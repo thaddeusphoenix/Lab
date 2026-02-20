@@ -1,4 +1,4 @@
-# Lab
+# lab
 
 This is a monorepo where coding projects are built using a team-based product development model. Each project lives in `projects/` and is developed through a structured lifecycle with input from specialized team personas.
 
