@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Workbook Profile</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0b141a;
+    color: #e9edef;
+    min-height: 100dvh;
+  }
+
+  .fidelity-badge {
+    background: #1f2c34;
+    text-align: center;
+    padding: 6px;
+    font-size: 11px;
+    color: #8696a0;
+  }
+  .fidelity-badge span { color: #00a884; font-weight: 600; }
+
+  .hero {
+    background: linear-gradient(135deg, #005c4b 0%, #00a884 100%);
+    padding: 32px 20px 28px;
+    text-align: center;
+  }
+  .avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 700; color: #fff;
+  }
+  .hero h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .hero .trade {
+    font-size: 15px;
+    opacity: 0.85;
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 18px 20px;
+    background: #1f2c34;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat .number {
+    font-size: 22px;
+    font-weight: 700;
+    color: #00a884;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: #8696a0;
+    margin-top: 2px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8696a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 20px 20px 10px;
+  }
+
+  .job-card {
+    background: #1f2c34;
+    margin: 0 12px 10px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .job-header {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .job-header .location {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .job-header .date {
+    font-size: 12px;
+    color: #8696a0;
+  }
+
+  .job-photos {
+    display: flex;
+    gap: 2px;
+    padding: 0 2px;
+  }
+  .job-photos .photo-slot {
+    flex: 1;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #8696a0;
+  }
+  .photo-slot.before { background: #2a1a1a; }
+  .photo-slot.progress { background: #2a2a1a; }
+  .photo-slot.completed { background: #1a2a1a; }
+  .photo-slot .icon { font-size: 24px; }
+  .photo-slot .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .job-footer {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #8696a0;
+    border-top: 1px solid #2a3942;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 168, 132, 0.15);
+    color: #00a884;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+  .badge .check { font-size: 14px; }
+
+  .verified-banner {
+    margin: 12px 12px 0;
+    padding: 12px 16px;
+    background: rgba(0, 168, 132, 0.1);
+    border: 1px solid rgba(0, 168, 132, 0.2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #8696a0;
+    line-height: 1.5;
+    text-align: center;
+  }
+  .verified-banner strong { color: #00a884; }
+
+  .cta {
+    margin: 20px 12px;
+    padding: 14px;
+    background: #00a884;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    display: block;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #8696a0;
+  }
+  .footer strong { color: #00a884; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8696a0;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="fidelity-badge"><span>Cardboard</span> prototype — simulated profile, no real data</div>
+
+<div id="app"></div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get('name') || 'Worker';
+  const trade = params.get('trade') || 'Trade';
+  const jobsParam = params.get('jobs');
+
+  let jobs = [];
+  if (jobsParam) {
+    try {
+      jobs = JSON.parse(decodeURIComponent(jobsParam));
+    } catch (e) {
+      jobs = [];
+    }
+  }
+
+  const totalPhotos = jobs.reduce((s, j) => s + (j.photos ? j.photos.length : 0), 0);
+  const totalValidations = jobs.filter(j => j.validated).length;
+  const initial = name.charAt(0).toUpperCase();
+
+  document.title = `${name} — ${trade} | Workbook`;
+
+  let html = '';
+
+  // Hero
+  html += `
+    <div class="hero">
+      <div class="avatar">${initial}</div>
+      <h1>${name}</h1>
+      <div class="trade">${trade}</div>
+    </div>
+  `;
+
+  // Stats
+  html += `
+    <div class="stats">
+      <div class="stat">
+        <div class="number">${jobs.length}</div>
+        <div class="label">Job${jobs.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="stat">
+        <div class="number">${totalPhotos}</div>
+        <div class="label">Photo${totalPhotos !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="stat">
+        <div class="number">${totalValidations}</div>
+        <div class="label">Validation${totalValidations !== 1 ? 's' : ''}</div>
+      </div>
+    </div>
+  `;
+
+  if (jobs.length === 0) {
+    html += `<div class="empty-state">This worker hasn't logged any jobs yet.<br>Check back soon.</div>`;
+  } else {
+    html += `<div class="section-title">Verified Jobs</div>`;
+
+    jobs.forEach((job, i) => {
+      const photoSlots = (job.photos || []).map(p => {
+        const icons = { before: '&#128679;', progress: '&#128296;', completed: '&#9989;' };
+        const labels = { before: 'Before', progress: 'Progress', completed: 'Completed' };
+        return `<div class="photo-slot ${p}"><span class="icon">${icons[p]}</span><span class="label">${labels[p]}</span></div>`;
+      }).join('');
+
+      html += `
+        <div class="job-card">
+          <div class="job-header">
+            <span class="location">${job.location}</span>
+            <span class="date">${job.date}</span>
+          </div>
+          <div class="job-photos">${photoSlots}</div>
+          <div class="job-footer">
+            ${job.validated
+              ? '<span class="badge"><span class="check">&#10003;</span> Peer Validated</span>'
+              : '<span>Awaiting peer validation</span>'}
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // Verified banner
+  if (totalValidations > 0) {
+    html += `
+      <div class="verified-banner">
+        <strong>&#9889; Verified by peers.</strong> ${totalValidations} job${totalValidations !== 1 ? 's' : ''} confirmed by fellow tradespeople who were on site.
+      </div>
+    `;
+  }
+
+  // CTA
+  html += `<a class="cta" href="whatsapp-prototype.html">Hire ${name} through Workbook</a>`;
+
+  // Footer
+  html += `<div class="footer">Powered by <strong>Workbook</strong><br>Proof of work, not word of mouth.</div>`;
+
+  document.getElementById('app').innerHTML = html;
+</script>
+</body>
+</html>

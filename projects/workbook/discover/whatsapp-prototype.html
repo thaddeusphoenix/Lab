@@ -543,8 +543,10 @@ async function showPortfolio() {
 async function shareLink() {
   const slug = userName.toLowerCase().replace(/\s+/g, '-');
   const hash = Math.random().toString(36).substring(2, 6);
+  const profileData = encodeURIComponent(JSON.stringify(jobs));
+  const profileUrl = `workbook-profile.html?name=${encodeURIComponent(userName)}&trade=${encodeURIComponent(userTrade)}&jobs=${profileData}`;
   await botSays(
-    `Here's your public Workbook link:\n\n<strong>workbook.co/${slug}-${userTrade.toLowerCase()}-${hash}</strong>\n\nAnyone with this link can see your verified jobs, photos, and badges. Send it to contractors, post it anywhere \u2014 it's yours.`
+    `Here's your public Workbook link:\n\n<a href="${profileUrl}" target="_blank" style="color:#00a884;text-decoration:underline;word-break:break-all;">workbook.co/${slug}-${userTrade.toLowerCase()}-${hash}</a>\n\nAnyone with this link can see your verified jobs, photos, and badges. Send it to contractors, post it anywhere \u2014 it's yours.`
   );
 }
 

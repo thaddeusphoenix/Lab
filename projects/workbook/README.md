@@ -43,3 +43,4 @@ Following Marty Cagan's framework:
 |---|---|---|
 | [`discover/whatsapp-flow.md`](discover/whatsapp-flow.md) | Paper | Scripted conversation flow — the full WhatsApp interaction written as Worker/Bot dialogue. |
 | [`discover/whatsapp-prototype.html`](discover/whatsapp-prototype.html) | Cardboard | Interactive mobile web page simulating the WhatsApp experience. Open in a phone browser. |
+| [`discover/workbook-profile.html`](discover/workbook-profile.html) | Cardboard | Public portfolio page — linked from the "share" flow in the WhatsApp prototype. |
