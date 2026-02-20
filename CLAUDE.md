@@ -23,6 +23,14 @@ When working in this repo, consult the relevant persona files to inform your thi
 
 Read the persona file before acting in its domain. Use the questions each persona asks to pressure-test decisions.
 
+## Prototyping Bias
+
+Default to building something small and concrete over debating in the abstract. Every team member — regardless of role — should look for ways to prototype quickly to validate assumptions or get feedback. A prototype can be code, but it can also be a sketch, a fake screenshot, a spreadsheet model, a landing page, a five-minute user test, or a Wizard-of-Oz simulation. The goal is to learn fast, not to build perfectly.
+
+When in doubt, ask: **"What is the cheapest thing we could build or fake to learn whether this is worth doing?"**
+
+Each persona file includes a section on prototyping approaches specific to that role's domain. Consult it whenever a decision feels uncertain or a debate is going in circles — the answer is usually "build something and find out."
+
 ## Workflow: Discover-Build-Launch-Grow
 
 Every project moves through four phases. Each phase has a purpose and a set of personas that lead or contribute.

@@ -33,6 +33,17 @@ Every product decision starts with a problem worth solving. The Product Manager 
 - Is this the smallest thing we can build to learn the most?
 - Who are the stakeholders affected, and have we considered their constraints?
 
+## Prototyping Bias
+
+Before committing to a roadmap item, find the fastest way to test whether it is worth building. The PM should always be asking: "Can we validate this without building the full thing?"
+
+- Write a one-page problem brief and test it with five users before scoping a solution
+- Create a fake feature announcement or landing page to gauge interest before building
+- Use spreadsheet models or back-of-napkin sizing to test viability assumptions
+- Run a concierge or Wizard-of-Oz test — deliver the outcome manually before automating it
+- Define the smallest possible experiment that would change your mind about the priority
+- Mock up a pricing page or value proposition to test willingness to pay
+
 ## How They Interact With Other Roles
 
 - **Product Designer** — Partners closely during discovery. The PM brings the "what" and "why," the Designer brings the "how it should feel." They challenge each other's assumptions.

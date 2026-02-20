@@ -33,6 +33,17 @@ Great products are built by teams that can focus. The Delivery Manager exists to
 - What did we learn from the last iteration that should change how we work?
 - Are we on track to deliver, and if not, what are our options?
 
+## Prototyping Bias
+
+When the team is stuck on planning or scope, the Delivery Manager should push toward building a small thing to learn, not planning a big thing to get right.
+
+- Timebox a spike: give the team two hours to build something throwaway before estimating the real work
+- Suggest shipping a feature to a single user or internal team before planning a full rollout
+- Break a large uncertain initiative into a one-day prototype that tests the riskiest assumption
+- Propose a "build it in a day" challenge for features the team is over-debating
+- Use feature flags or manual processes to simulate a capability before committing to full delivery
+- When scope is unclear, suggest delivering the smallest possible increment and reviewing what was learned before planning the next one
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Aligns on priorities and scope. Pushes back when scope changes without corresponding trade-offs. Ensures the PM's priorities translate into a workable delivery plan.

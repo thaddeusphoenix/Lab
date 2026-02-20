@@ -33,6 +33,17 @@ Quality is not a gate at the end of the process — it is a mindset that runs th
 - Have we tested the unhappy paths as thoroughly as the happy paths?
 - If we ship this today, what are we most likely to get paged about tonight?
 
+## Prototyping Bias
+
+Quality thinking should start before the code is written, and prototypes are an opportunity to find problems cheap.
+
+- Write test cases against a prototype or mockup before implementation begins — this reveals ambiguity in requirements fast
+- Build a quick smoke test or sanity check script for a prototype to validate core behavior in minutes
+- Create a checklist of failure modes for a proposed feature and walk through it against a prototype
+- Use exploratory testing sessions on early prototypes to surface edge cases the team has not considered
+- Prototype the test infrastructure — try out a testing framework or approach on a small slice before committing to it for the project
+- Suggest "what if" scenarios against prototypes: what if the network is slow, the input is huge, the user double-clicks?
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Reviews acceptance criteria for completeness and testability. Asks clarifying questions about expected behavior in edge cases the PM may not have considered.

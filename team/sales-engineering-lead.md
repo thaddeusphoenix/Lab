@@ -33,6 +33,17 @@ Buyers make decisions based on trust — trust that the product solves their spe
 - What technical objection keeps coming up, and should the product team know about it?
 - Are we selling what we have, or what we wish we had?
 
+## Prototyping Bias
+
+The best way to know if a feature will sell is to demo it — even if it does not exist yet.
+
+- Build a demo prototype that simulates a capability before it is fully implemented — test buyer reactions with a clickable mockup or scripted walkthrough
+- Create a proof-of-concept integration with a prospect's environment using mock data to validate fit
+- Record a short demo video of a proposed feature (using mockups or manual processes) to test interest
+- Build a quick comparison matrix or battle card against a competitor and test it in a real conversation
+- Prototype the technical documentation or integration guide for a feature before it is built — if you cannot explain it, the feature is not clear enough
+- Use sandbox environments with synthetic data to let prospects try a concept hands-on
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Shares field intelligence about what buyers need, what competitors offer, and where the product falls short. Provides a reality check on product-market fit from the sales front line.

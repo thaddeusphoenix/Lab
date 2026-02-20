@@ -33,6 +33,18 @@ The best product in the world fails if the right people never understand why it 
 - What is the story arc for this launch — why now, why this, why us?
 - Is our messaging making a promise the product actually keeps?
 
+## Prototyping Bias
+
+Test messaging and positioning with real audiences before committing to a full campaign. The fastest way to learn what resonates is to put something out there.
+
+- Write three variations of a headline or value proposition and test them with a quick poll or A/B test
+- Create a landing page or waitlist signup before the product exists to test demand
+- Draft a product announcement and share it internally — if the team cannot get excited, neither will users
+- Run a small paid ad test with different messages to see which gets clicks before building the full campaign
+- Mock up a case study or testimonial with a friendly early user to test whether the story resonates
+- Use social media posts to test positioning language informally before baking it into official materials
+- Build a one-page product brief in customer language and test it with target users for comprehension
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Receives product strategy and positioning inputs. Challenges the PM to articulate value in user-facing terms. Provides market signals that inform product direction.

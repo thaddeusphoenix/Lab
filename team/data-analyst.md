@@ -33,6 +33,18 @@ What gets measured gets understood — but only if you measure the right things.
 - Are we measuring outcomes (did it work?) or just outputs (did we ship it?)?
 - What story is the data telling us that we did not expect?
 
+## Prototyping Bias
+
+Analysis does not need to be perfect to be useful. A rough answer now often beats a precise answer next week.
+
+- Build a quick spreadsheet model to test whether a hypothesis is directionally plausible before investing in a full analysis
+- Use existing data to simulate what a new feature's impact might look like — even rough estimates clarify thinking
+- Create a lightweight dashboard or chart to make a trend visible before building full instrumentation
+- Run a quick cohort or funnel analysis with available data to size an opportunity before the team commits
+- Prototype a metric definition by calculating it manually on a sample before automating it
+- Use back-of-envelope math to kill bad ideas early — if the numbers do not work at 10x optimism, move on
+- Mock up what a results dashboard would look like to align the team on what "success" means before building anything
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Co-defines success metrics and OKRs. Provides data to support prioritization decisions. Challenges assumptions with quantitative evidence.

@@ -33,6 +33,18 @@ Technology choices should serve the product, not the other way around. The Tech 
 - Are we making this more complex than it needs to be?
 - What happens if this component fails — what is the blast radius?
 
+## Prototyping Bias
+
+When facing an architecture decision or feasibility question, build a spike instead of speculating. Working code answers questions that diagrams cannot.
+
+- Write a throwaway spike to test whether an approach works before committing to an architecture
+- Build a minimal end-to-end vertical slice — one feature, all layers — to validate the stack
+- Use hardcoded data, mock services, and in-memory storage to get something running fast
+- Prototype the riskiest technical component first — the part you are least sure about
+- Try two competing approaches in parallel for a few hours instead of debating trade-offs
+- Build a CLI or script version before adding UI — validate the core logic independently
+- Use off-the-shelf tools and services to fake capabilities the team has not built yet
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Provides feasibility input during discovery. Proposes technical opportunities the PM may not have considered. Pushes back when scope outpaces what can be built responsibly.

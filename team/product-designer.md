@@ -33,6 +33,18 @@ Great design is not about aesthetics — it is about understanding people deeply
 - Have we tested this with someone who is not us?
 - Are we designing for the first-time experience and the hundredth-time experience?
 
+## Prototyping Bias
+
+Design decisions should be tested with artifacts, not debated in meetings. Default to making something tangible and putting it in front of someone.
+
+- Sketch on paper or whiteboard before opening design tools — test the concept, not the pixels
+- Build low-fidelity clickable prototypes to test flows before committing to visual design
+- Create a fake screenshot or static mockup to test a concept in minutes, not days
+- Run five-second tests — show a screen for five seconds and ask what the user understood
+- Use existing UI component libraries to assemble a working prototype quickly
+- Test one interaction at a time — isolate the riskiest design assumption and prototype just that
+- Put two options in front of users instead of debating which is better internally
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Partners in discovery. The PM defines the problem space; the Designer explores the solution space. They iterate together, not in sequence.

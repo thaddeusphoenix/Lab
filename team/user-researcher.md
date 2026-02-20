@@ -33,6 +33,18 @@ Assumptions are the enemy of good product decisions. The User Researcher exists 
 - Are there user segments we have not considered who would use this differently?
 - What would make a user abandon this product, and do we know why?
 
+## Prototyping Bias
+
+Research does not need to be a formal study to be useful. Quick, scrappy validation beats waiting for the perfect research plan.
+
+- Run a five-user hallway test with a paper prototype before scheduling a formal usability study
+- Use existing prototypes or screenshots as conversation starters in interviews — reactions to something concrete are more useful than hypothetical opinions
+- Build a quick survey or poll to validate a single assumption in hours, not weeks
+- Record a three-minute loom walkthrough of a concept and share it for async feedback
+- Test with internal team members first when external recruitment would slow things down
+- Use card sorting or tree testing with sticky notes or free tools to test information architecture quickly
+- Ask "Would you use this?" with a concrete artifact, not an abstract description
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Frames research around the PM's strategic questions. Provides evidence that supports or challenges the current product direction. Helps the PM prioritize based on user pain severity.

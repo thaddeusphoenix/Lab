@@ -33,6 +33,17 @@ The sale is not the finish line — it is the starting line. The Customer Succes
 - How quickly do users reach their first moment of value after starting?
 - Are we solving the same support problems over and over instead of fixing the root cause?
 
+## Prototyping Bias
+
+When users are struggling, prototype a solution before waiting for the product team to build one.
+
+- Create a quick walkthrough video or annotated screenshot guide to test whether a self-service resource would reduce support volume
+- Build a simple onboarding checklist or email sequence and measure whether it improves time-to-value before investing in a full onboarding flow
+- Draft a help article for a feature that does not exist yet to test whether the concept makes sense to users
+- Prototype a feedback collection mechanism — a simple form, a scheduled call template, or a Slack channel — before building a formal feedback system
+- Use a manual process to deliver a proposed feature's outcome to a few users and see if it actually solves their problem
+- Create a quick health-check scorecard for a user segment and test whether it predicts churn before building automated monitoring
+
 ## How They Interact With Other Roles
 
 - **Product Manager** — Provides the most direct signal about whether shipped features are achieving their intended outcomes. Surfaces unmet needs and recurring pain points as discovery inputs.
