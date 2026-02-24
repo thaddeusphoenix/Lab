@@ -1,72 +1,42 @@
 # Workbook — Feature List
 
-A complete map of the features needed to support the initiative. Grouped by phase. Links to briefs where they exist.
+A complete map of the features in scope for the initiative. Grouped by phase.
 
 **Last updated:** 2026-02-23
 
 ---
 
-## Phase 1 — Supply Foundation
+## Current Scope
 
-The core loop. Workers can onboard, document work, build a verified portfolio, and share it. This is the minimum viable supply side.
-
-| Feature | Description | Brief |
-|---|---|---|
-| **WhatsApp Ingestion Engine** | Worker onboarding, photo logging (Before / Progress / Completed), job bundling, Proximity Protocol initiation | [`whatsapp-ingestion.md`](whatsapp-ingestion.md) |
-| **Trust Engine** | EXIF metadata verification, computer vision consistency checks, composite trust badge per job entry | [`trust-engine.md`](trust-engine.md) |
-| **Proximity Protocol** | Detects co-present verified workers at the same GPS location; sends WhatsApp vouching request; feeds peer validation signal to Trust Engine | [`proximity-protocol.md`](proximity-protocol.md) |
-| **Worker Profile & Reference Book** | Public-facing portfolio page showing verified jobs, trust badges, trade, and location; shareable via link generated in WhatsApp | [`worker-profile.md`](worker-profile.md) |
-
----
-
-## Phase 2 — Transaction Layer
-
-Workers can agree on scope and price, invoice clients, and get paid. The supply side becomes sticky and the platform embeds in the money flow.
+All local storage. Communication via text message only. No accounts, no registration, no third-party services.
 
 | Feature | Description | Brief |
 |---|---|---|
-| **Worker Payments** | Scope agreement with client confirmation via WhatsApp, invoice generation, payment link delivery, payment status tracking | [`worker-payments.md`](worker-payments.md) |
-| **Worker Payment Setup** | One-time flow for a worker to connect a bank account and complete identity verification (Stripe Connect) before they can receive payouts | [`worker-payment-setup.md`](worker-payment-setup.md) |
-| **Notification & Reminder Engine** | Automated WhatsApp messages for: payment overdue reminders to clients, peer validation requests, badge updates, new inquiry alerts | [`notification-reminder-engine.md`](notification-reminder-engine.md) |
-
----
-
-## Phase 3 — Demand Side & Marketplace
-
-Contractors and homeowners can find, evaluate, and hire verified workers. This is where Workbook monetizes the demand side.
-
-| Feature | Description | Brief |
-|---|---|---|
-| **GC & Homeowner Marketplace** | Searchable directory of verified workers; filterable by trade, location, and trust level; contact/hire flow for buyers | [`gc-homeowner-marketplace.md`](gc-homeowner-marketplace.md) |
-| **Worker Discoverability** | How workers surface in the marketplace — skill tags, location radius, trust score ranking, availability signal | [`worker-discoverability.md`](worker-discoverability.md) |
-
----
-
-## Platform
-
-Internal and operational features that support reliability, safety, and scale. Not user-facing. Post-MVP.
-
-| Feature | Description | Brief |
-|---|---|---|
-| **Admin & Trust Operations** | Internal tooling for fraud review, badge dispute adjudication, Trust Engine overrides, and manual worker verification | [`admin-trust-operations.md`](admin-trust-operations.md) |
-
----
-
-## Summary
-
-| Phase | Features | Briefed | Needs Brief |
-|---|---|---|---|
-| Phase 1 — Supply Foundation | 4 | 4 | 0 |
-| Phase 2 — Transaction Layer | 3 | 3 | 0 |
-| Phase 3 — Demand Side | 2 | 2 | 0 |
-| Platform | 1 | 1 | 0 |
-| **Total** | **10** | **10** | **0** |
+| **Scope & Invoice Tool** | Local-first PWA: enter job details, generate a scope agreement text and invoice text, track payment status locally | [`scope-and-invoice.md`](scope-and-invoice.md) |
 
 ---
 
 ## Sequencing Notes
 
-- **Phase 1 must be complete before Phase 2.** Workers need a portfolio before they have anything to invoice for.
-- **Worker Payment Setup blocks Worker Payments.** A worker cannot receive a payout until their bank account is connected. This UX likely requires a web view — the one exception to the WhatsApp-only interface.
-- **Proximity Protocol can ship as part of the Trust Engine** in Phase 1 but may warrant its own brief if the peer validation mechanic becomes a primary growth mechanism.
-- **The Marketplace (Phase 3) can begin as a manual, concierge operation** — a curated list shared with GCs, before any self-serve product is built. Don't build it until the supply side has enough verified workers to make it credible.
+- This is a single-feature product in its current form. Build it, put it in front of real workers, and validate the core assumption: does a structured text invoice change client payment behavior?
+- The natural next pressure point is local storage portability — workers lose phones. That is the signal to revisit cloud storage, not a reason to build it now.
+- Marketplace, portfolio, and verification features are deprioritized below. They represent a valid direction if the payment behavior hypothesis is proven and a more ambitious build is warranted.
+
+---
+
+## Deprioritized
+
+Features explored during earlier discovery. Not in scope for the current phase. Briefs are preserved for reference.
+
+| Feature | Brief | Reason deprioritized |
+|---|---|---|
+| **WhatsApp Ingestion Engine** | [`whatsapp-ingestion.md`](whatsapp-ingestion.md) | Requires photo capture — text-only constraint |
+| **Trust Engine** | [`trust-engine.md`](trust-engine.md) | Requires cloud CV APIs and backend infrastructure |
+| **Proximity Protocol** | [`proximity-protocol.md`](proximity-protocol.md) | Requires server-side GPS matching and account identity |
+| **Worker Profile & Reference Book** | [`worker-profile.md`](worker-profile.md) | Requires hosted web page and cloud data |
+| **Worker Payments** | [`worker-payments.md`](worker-payments.md) | Requires Stripe, account registration, payment facilitation |
+| **Worker Payment Setup** | [`worker-payment-setup.md`](worker-payment-setup.md) | Requires KYC and bank account registration |
+| **Notification & Reminder Engine** | [`notification-reminder-engine.md`](notification-reminder-engine.md) | Requires server infrastructure for outbound messaging |
+| **GC & Homeowner Marketplace** | [`gc-homeowner-marketplace.md`](gc-homeowner-marketplace.md) | Requires cloud backend and hosted directory |
+| **Worker Discoverability** | [`worker-discoverability.md`](worker-discoverability.md) | Requires search infrastructure and hosted profiles |
+| **Admin & Trust Operations** | [`admin-trust-operations.md`](admin-trust-operations.md) | Requires backend and Trust Engine infrastructure |

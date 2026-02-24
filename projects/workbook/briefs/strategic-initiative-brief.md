@@ -1,59 +1,60 @@
 # Strategic Initiative Brief: Workbook
 
-> A WhatsApp-native operating system for the trades — where skilled workers build a verified proof-of-work portfolio, agree on job scope and price, and get paid reliably.
+> A local-first text tool for trades workers — agree on job scope, send a text invoice, track what you're owed. No backend, no accounts, no registration.
 
 **Status:** Draft
 **Owner:** Wintermute (Product Manager)
 **Last updated:** 2026-02-23
 **Feature List:** [`features.md`](features.md)
-**Feature Briefs:** [`whatsapp-ingestion.md`](whatsapp-ingestion.md), [`trust-engine.md`](trust-engine.md), [`proximity-protocol.md`](proximity-protocol.md), [`worker-profile.md`](worker-profile.md), [`worker-payments.md`](worker-payments.md), [`worker-payment-setup.md`](worker-payment-setup.md), [`notification-reminder-engine.md`](notification-reminder-engine.md), [`gc-homeowner-marketplace.md`](gc-homeowner-marketplace.md), [`worker-discoverability.md`](worker-discoverability.md), [`admin-trust-operations.md`](admin-trust-operations.md)
+**Feature Briefs:** [`scope-and-invoice.md`](scope-and-invoice.md)
 
 ---
 
 ## The Opportunity
 
-Skilled trade and construction labor — a workforce in the tens of millions globally, heavily immigrant — has no portable, digital record of its work. Reputation travels by word of mouth, locked inside a single employer or foreman relationship. When a worker moves to a new city, contractor, or trade, that history disappears. From the contractor side, General Contractors face a documented global labor shortage and hire largely blind: no verified skill record, no work history, no accountability layer beyond a phone call to a reference who may or may not pick up.
+Skilled trade workers — handymen, tile setters, plumbers, painters, electricians — start jobs on a handshake and invoice on a text message that says "hey, can you pay me?" When the client goes quiet, the worker has nothing to point to: no written agreement, no formal invoice, no paper trail. The only leverage is to stop coming back. They absorb this risk because building a more professional process has always required registering for tools designed for licensed contractors — Stripe, QuickBooks, Wave — that assume a bank account, an email address, and a business entity.
 
-This is a two-sided data vacuum. On the supply side, workers have no way to build equity from their daily labor. On the demand side, GCs carry hiring risk on every new crew member with no systemic way to reduce it.
+The opportunity is simpler than any of that. The worker already has a phone. The client is already in their contacts. The WhatsApp or SMS thread already serves as a timestamped, written record — it just needs better input. A structured text message agreeing on scope, and a structured text message invoicing for the work, is all that separates an informal handshake from a written record both parties can point to. No server required. No account required. The conversation thread is the ledger.
 
 ## Why Now
 
-Three forces are converging:
+Two things make this the right moment:
 
-1. **The labor shortage is structural, not cyclical.** The construction industry faces a persistent skilled labor gap driven by aging workforce retirement and underinvestment in trade training. GCs are actively looking for better ways to source and vet labor — the demand-side pain is acute.
+1. **The infrastructure constraint is the insight.** Removing cloud, accounts, and registration doesn't limit the product — it defines it. A Progressive Web App that a worker saves to their home screen from a link, with no App Store and no sign-up, can be in a worker's hands the same day they hear about it. There is no onboarding funnel to lose them in.
 
-2. **WhatsApp is already the infrastructure.** The smartphone is already in the worker's pocket. WhatsApp has deep penetration in the communities that make up much of the US and global construction labor force. The distribution channel exists — the product just needs to show up inside it.
-
-3. **Computer vision and AI are now capable at the edge.** Assessing construction photo quality, mapping visual consistency across a job sequence, and extracting metadata from images (GPS, timestamps) are now tractable problems with commodity API access. The "Truth Engine" that makes the verification meaningful is buildable by a small team.
+2. **Text is already how this population communicates about work.** Workers already send informal job confirmations and payment requests via WhatsApp. The behavior exists. The tool just structures it.
 
 ## Why Us
 
-The moat is not the interface — it's the data and the network. Every verified photo record created by a worker is behavioral data that cannot be purchased, licensed, or synthesized. Competitive entrants face the same cold-start problem we do, but we can get there first by meeting workers on WhatsApp rather than asking them to change their behavior. Traditional workforce platforms (LinkedIn, Indeed, staffing agencies) are structurally unable to reach this population — their acquisition models assume email addresses, résumés, and internet-native behavior. We enter where those tools cannot.
+We can build this in a week and put it in front of real workers. No infrastructure decisions, no legal review of payment facilitation, no KYC strategy. The constraint removes every blocker and compresses the feedback loop to days. If a structured text invoice changes client payment behavior — even slightly — that's the signal worth building on.
 
 ## What We're Building
 
-A WhatsApp-native platform that serves the full job lifecycle for a skilled trades worker. Workers document their work with Before, Progress, and Completed photos — an AI Trust Engine verifies the record and builds a portable Reference Book. Before a job starts, the worker can agree on scope, price, and start date via WhatsApp and have that agreement confirmed by the client in writing. When the job is complete, the bot offers to invoice the client directly and tracks payment status — all without leaving the conversation. Contractors and homeowners access verified workers through the marketplace; the worker's phone number is their account across all of it.
+A local-first Progressive Web App. Workers save it to their home screen from a link — no App Store, no login, no registration of any kind. They enter a job: client name, job description, price, start date. The app generates a scope agreement in plain text, ready to copy into any conversation. When the job is done, the app generates an invoice in plain text, ready to send the same way. Workers mark jobs as paid when money arrives. All data lives in local storage on the phone. There is no server, no database, no third-party service involved at any point.
+
+The client does not need to download anything. They receive a text message. That is the entire product surface.
 
 ## What We're Not Doing
 
-- Not building payroll, tax handling, or employment classification tooling
-- Not targeting white-collar, office, or remote workers
-- Not replacing HR systems or integrating with ATS platforms in this phase
-- Not building a native mobile app — the interface is WhatsApp, full stop
+- No photos, portfolio building, or proof-of-work documentation
+- No cloud backend, server, or database of any kind
+- No account creation or service registration — not with Workbook, not with any third party
+- No automated messaging or scheduled outbound reminders
+- No payment processing, payment links, or bank account integration
+- No marketplace, contractor-facing search, or hiring features
 
 ## Success Looks Like
 
 | Metric | Target | Timeframe |
 |---|---|---|
-| Verified workers with 10+ records in their Reference Book | 500 | 6 months post-launch |
-| Monthly worker retention (active photo submissions) | ≥ 40% | 6 months post-launch |
-| Jobs invoiced through Workbook (vs. off-platform) | ≥ 50% of completed jobs | 6 months post-launch |
-| Paying GC or homeowner accounts sourcing through the marketplace | 10 | 12 months post-launch |
+| Workers who use the scope agreement on at least one real job | 20 | 30 days post-launch |
+| Workers who send a text invoice on at least one job | 20 | 30 days post-launch |
+| Workers who return to log a second job | ≥ 50% of first-job users | 60 days post-launch |
 
 ## Biggest Unknowns
 
-1. **Can the AI Trust Engine work in the real world?** Construction sites are messy, lighting is poor, and fraud is motivated. Does computer vision produce reliable quality signals in these conditions — or does it produce noise that erodes trust in the verification?
+1. **Does a formal text invoice change client payment behavior?** The hypothesis is that a structured, professional-looking invoice message creates a social obligation that a casual "hey can you pay me" does not. This is the core assumption and it needs to be tested on real jobs with real clients before anything else is built.
 
-2. **Will clients pay through Workbook rather than cash?** Workers want to use the payment flow — the incentive is clear. But the client has to cooperate. Many homeowners and small contractors prefer cash for informal work. Does the convenience of a payment link change their behavior, or do we hit a ceiling where the client side opts out regardless?
+2. **Will workers install even a zero-friction PWA?** Saving a web page to a home screen is not the same as downloading an app — but it is still a new behavior. If workers find the templates useful but just copy the format into their own messages without ever returning to the app, that is still a valid outcome — but it tells us the product is a template, not a tool.
 
-3. **What is the GC's actual evidence threshold?** Before a contractor pays for or acts on a Workbook verification, what level of proof do they need to trust it? And who inside the GC organization is the actual buyer — the foreman, the HR team, the owner?
+3. **Does a written scope agreement prevent disputes, or just document them?** A written "yes" from the client is not legally binding in most informal labor contexts. If clients dispute payment after confirming scope in writing, the tool has documented the dispute but not resolved it. We need to understand whether workers feel more protected and whether clients actually honor their written confirmations.
