@@ -1,6 +1,6 @@
 # Strategic Initiative Brief: Workbook
 
-> A local-first text tool for trades workers — agree on job scope, send a text invoice, track what you're owed. No backend, no accounts, no registration.
+> A text-message interface for trades workers — agree on job scope, send a text invoice, track what you're owed. Worker texts a phone number; a thin AI server processes and responds; data is stored locally on the device.
 
 **Status:** Draft
 **Owner:** Wintermute (Product Manager)
@@ -30,16 +30,18 @@ We can build this in a week and put it in front of real workers. No infrastructu
 
 ## What We're Building
 
-A local-first Progressive Web App. Workers save it to their home screen from a link — no App Store, no login, no registration of any kind. They enter a job: client name, job description, price, start date. The app generates a scope agreement in plain text, ready to copy into any conversation. When the job is done, the app generates an invoice in plain text, ready to send the same way. Workers mark jobs as paid when money arrives. All data lives in local storage on the phone. There is no server, no database, no third-party service involved at any point.
+A text-message interface. The worker texts a dedicated phone number — no app required to start. On first contact, they receive an enrollment message and confirm with a reply. From that point on, the number is their interface: they text it to create a job, agree on scope, generate an invoice, and mark work as paid. A thin AI server receives each message, understands the intent, and responds with the right output. Job data is stored locally on the worker's device.
 
-The client does not need to download anything. They receive a text message. That is the entire product surface.
+The client does not need to download anything or sign up for anything. They receive a text message from the worker. That is the entire product surface for the client.
+
+The open engineering question is how local storage works without an app: if the interface is pure SMS, there is no mechanism to write structured data to the device. A companion app — potentially requiring an App Store download — may be necessary to maintain the local job ledger. This question is unresolved and needs a decision from engineering before the architecture is locked.
 
 ## What We're Not Doing
 
 - No photos, portfolio building, or proof-of-work documentation
-- No cloud backend, server, or database of any kind
-- No account creation or service registration — not with Workbook, not with any third party
-- No automated messaging or scheduled outbound reminders
+- No persistent server-side storage of worker data — the server processes and responds, it does not retain
+- No account creation or registration with any third-party service
+- No automated outbound reminders or scheduled messaging
 - No payment processing, payment links, or bank account integration
 - No marketplace, contractor-facing search, or hiring features
 
