@@ -203,8 +203,8 @@
         const state = {
             activeTool: 'paint-grass',
             rotationIndex: 0,
-            gridSize: 20,
-            tileSize: 2,
+            gridSize: 16,
+            tileSize: 4,
             trackMap: new Map(), // Logical mapping of "x,z" to track info
             trains: []           // Active train entities
         };
@@ -223,10 +223,10 @@
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x1a1a1a);
-        scene.fog = new THREE.Fog(0x1a1a1a, 30, 80);
+        scene.fog = new THREE.Fog(0x1a1a1a, 70, 180);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(-20, 25, 25);
+        camera.position.set(-40, 50, 50);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -242,8 +242,8 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.maxPolarAngle = Math.PI / 2.1;
-        controls.minDistance = 10;
-        controls.maxDistance = 60;
+        controls.minDistance = 20;
+        controls.maxDistance = 140;
         controls.mouseButtons = {
             LEFT: null,
             MIDDLE: THREE.MOUSE.DOLLY,
@@ -255,16 +255,16 @@
         scene.add(ambientLight);
 
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        dirLight.position.set(20, 40, 10);
+        dirLight.position.set(30, 55, 15);
         dirLight.castShadow = true;
         dirLight.shadow.mapSize.width = 2048;
         dirLight.shadow.mapSize.height = 2048;
         dirLight.shadow.camera.near = 0.5;
-        dirLight.shadow.camera.far = 100;
-        dirLight.shadow.camera.left = -25;
-        dirLight.shadow.camera.right = 25;
-        dirLight.shadow.camera.top = 25;
-        dirLight.shadow.camera.bottom = -25;
+        dirLight.shadow.camera.far = 150;
+        dirLight.shadow.camera.left = -45;
+        dirLight.shadow.camera.right = 45;
+        dirLight.shadow.camera.top = 45;
+        dirLight.shadow.camera.bottom = -45;
         dirLight.shadow.bias = -0.001;
         scene.add(dirLight);
 
@@ -285,7 +285,7 @@
         const matSwitchStand = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
 
         // --- Environment Generation ---
-        const tableGeo = new THREE.BoxGeometry(100, 2, 80);
+        const tableGeo = new THREE.BoxGeometry(180, 2, 160);
         const table = new THREE.Mesh(tableGeo, matTableWood);
         table.position.y = -3;
         table.receiveShadow = true;
@@ -322,16 +322,18 @@
         // --- Model Factories ---
         function createStraightTrack() {
             const group = new THREE.Group();
-            for(let i=0; i<4; i++) {
-                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.3), matWood);
-                sleeper.position.set(0, 0.05, -0.75 + i*0.5);
+            // 8 sleepers across a 4-unit tile — wider than gauge (realistic ballast bed)
+            for(let i = 0; i < 8; i++) {
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 0.4), matWood);
+                sleeper.position.set(0, 0.06, -1.75 + i * 0.5);
                 sleeper.castShadow = true; sleeper.receiveShadow = true;
                 group.add(sleeper);
             }
-            const railL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            // Gauge stays at 1.0 — rails at ±0.5 regardless of tile size
+            const railL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 4.1), matMetal);
             railL.position.set(-0.5, 0.2, 0);
             railL.castShadow = true; railL.receiveShadow = true;
-            const railR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            const railR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 4.1), matMetal);
             railR.position.set(0.5, 0.2, 0);
             railR.castShadow = true; railR.receiveShadow = true;
             group.add(railL, railR);
@@ -349,41 +351,45 @@
 
         function createCurveTrack() {
             const group = new THREE.Group();
+            // Gauge stays at 1.0. Corner at (2,0.3,2) — tile corner for a 4-unit tile.
+            // Inner rail at radius 1.5 from corner, outer at 2.5 — gives correct gauge of 1.0.
+            // Curve centerline radius = 2.0 units (doubled from old 1.0).
             const extInner = 0.05;
             const shapeInner = new THREE.Shape();
-            shapeInner.moveTo(Math.cos(-extInner)*0.55, Math.sin(-extInner)*0.55);
-            shapeInner.absarc(0, 0, 0.55, -extInner, Math.PI/2 + extInner, false);
-            shapeInner.lineTo(Math.cos(Math.PI/2 + extInner)*0.45, Math.sin(Math.PI/2 + extInner)*0.45);
-            shapeInner.absarc(0, 0, 0.45, Math.PI/2 + extInner, -extInner, true);
+            shapeInner.moveTo(Math.cos(-extInner)*1.55, Math.sin(-extInner)*1.55);
+            shapeInner.absarc(0, 0, 1.55, -extInner, Math.PI/2 + extInner, false);
+            shapeInner.lineTo(Math.cos(Math.PI/2 + extInner)*1.45, Math.sin(Math.PI/2 + extInner)*1.45);
+            shapeInner.absarc(0, 0, 1.45, Math.PI/2 + extInner, -extInner, true);
 
-            const innerRailGeo = new THREE.ExtrudeGeometry(shapeInner, { depth: 0.2, bevelEnabled: false, curveSegments: 16 });
+            const innerRailGeo = new THREE.ExtrudeGeometry(shapeInner, { depth: 0.2, bevelEnabled: false, curveSegments: 24 });
             const innerRail = new THREE.Mesh(innerRailGeo, matMetal);
-            innerRail.position.set(1, 0.3, 1);
+            innerRail.position.set(2, 0.3, 2);
             innerRail.rotation.x = Math.PI/2;
             innerRail.rotation.z = Math.PI;
             innerRail.castShadow = true; innerRail.receiveShadow = true;
 
             const extOuter = 0.017;
             const shapeOuter = new THREE.Shape();
-            shapeOuter.moveTo(Math.cos(-extOuter)*1.55, Math.sin(-extOuter)*1.55);
-            shapeOuter.absarc(0, 0, 1.55, -extOuter, Math.PI/2 + extOuter, false);
-            shapeOuter.lineTo(Math.cos(Math.PI/2 + extOuter)*1.45, Math.sin(Math.PI/2 + extOuter)*1.45);
-            shapeOuter.absarc(0, 0, 1.45, Math.PI/2 + extOuter, -extOuter, true);
+            shapeOuter.moveTo(Math.cos(-extOuter)*2.55, Math.sin(-extOuter)*2.55);
+            shapeOuter.absarc(0, 0, 2.55, -extOuter, Math.PI/2 + extOuter, false);
+            shapeOuter.lineTo(Math.cos(Math.PI/2 + extOuter)*2.45, Math.sin(Math.PI/2 + extOuter)*2.45);
+            shapeOuter.absarc(0, 0, 2.45, Math.PI/2 + extOuter, -extOuter, true);
 
-            const outerRailGeo = new THREE.ExtrudeGeometry(shapeOuter, { depth: 0.2, bevelEnabled: false, curveSegments: 32 });
+            const outerRailGeo = new THREE.ExtrudeGeometry(shapeOuter, { depth: 0.2, bevelEnabled: false, curveSegments: 48 });
             const outerRail = new THREE.Mesh(outerRailGeo, matMetal);
-            outerRail.position.set(1, 0.3, 1);
+            outerRail.position.set(2, 0.3, 2);
             outerRail.rotation.x = Math.PI/2;
             outerRail.rotation.z = Math.PI;
             outerRail.castShadow = true; outerRail.receiveShadow = true;
 
             group.add(innerRail, outerRail);
 
-            for(let a = Math.PI + 0.2; a < Math.PI*1.5; a += 0.35) {
-                const sx = 1 + Math.cos(a) * 1;
-                const sz = 1 + Math.sin(a) * 1;
-                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.3), matWood);
-                sleeper.position.set(sx, 0.05, sz);
+            // Sleepers along centerline at radius 2.0 from corner
+            for(let a = Math.PI + 0.15; a < Math.PI*1.5; a += 0.2) {
+                const sx = 2 + Math.cos(a) * 2;
+                const sz = 2 + Math.sin(a) * 2;
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.12, 0.4), matWood);
+                sleeper.position.set(sx, 0.06, sz);
                 sleeper.rotation.y = -a;
                 sleeper.castShadow = true; sleeper.receiveShadow = true;
                 group.add(sleeper);
@@ -395,31 +401,32 @@
             const group = new THREE.Group();
 
             // --- Straight Rails ---
-            const railL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            const railL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 4.1), matMetal);
             railL.position.set(-0.5, 0.2, 0);
-            const railR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            const railR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 4.1), matMetal);
             railR.position.set(0.5, 0.2, 0);
             railL.castShadow = railL.receiveShadow = railR.castShadow = railR.receiveShadow = true;
             group.add(railL, railR);
 
             // --- Curve Rails ---
+            // Gauge = 1.0: inner centerline at radius 1.5, outer at 2.5, from corner at (2, 0.3, 2)
             const extInner = 0.05;
             const shapeInner = new THREE.Shape();
-            shapeInner.moveTo(Math.cos(-extInner)*0.55, Math.sin(-extInner)*0.55);
-            shapeInner.absarc(0, 0, 0.55, -extInner, Math.PI/2 + extInner, false);
-            shapeInner.lineTo(Math.cos(Math.PI/2 + extInner)*0.45, Math.sin(Math.PI/2 + extInner)*0.45);
-            shapeInner.absarc(0, 0, 0.45, Math.PI/2 + extInner, -extInner, true);
+            shapeInner.moveTo(Math.cos(-extInner)*1.55, Math.sin(-extInner)*1.55);
+            shapeInner.absarc(0, 0, 1.55, -extInner, Math.PI/2 + extInner, false);
+            shapeInner.lineTo(Math.cos(Math.PI/2 + extInner)*1.45, Math.sin(Math.PI/2 + extInner)*1.45);
+            shapeInner.absarc(0, 0, 1.45, Math.PI/2 + extInner, -extInner, true);
             const innerRailGeo = new THREE.ExtrudeGeometry(shapeInner, { depth: 0.2, bevelEnabled: false, curveSegments: 16 });
-            innerRailGeo.rotateZ(Math.PI); innerRailGeo.rotateX(Math.PI/2); innerRailGeo.translate(1, 0.3, 1);
+            innerRailGeo.rotateZ(Math.PI); innerRailGeo.rotateX(Math.PI/2); innerRailGeo.translate(2, 0.3, 2);
 
             const extOuter = 0.017;
             const shapeOuter = new THREE.Shape();
-            shapeOuter.moveTo(Math.cos(-extOuter)*1.55, Math.sin(-extOuter)*1.55);
-            shapeOuter.absarc(0, 0, 1.55, -extOuter, Math.PI/2 + extOuter, false);
-            shapeOuter.lineTo(Math.cos(Math.PI/2 + extOuter)*1.45, Math.sin(Math.PI/2 + extOuter)*1.45);
-            shapeOuter.absarc(0, 0, 1.45, Math.PI/2 + extOuter, -extOuter, true);
+            shapeOuter.moveTo(Math.cos(-extOuter)*2.55, Math.sin(-extOuter)*2.55);
+            shapeOuter.absarc(0, 0, 2.55, -extOuter, Math.PI/2 + extOuter, false);
+            shapeOuter.lineTo(Math.cos(Math.PI/2 + extOuter)*2.45, Math.sin(Math.PI/2 + extOuter)*2.45);
+            shapeOuter.absarc(0, 0, 2.45, Math.PI/2 + extOuter, -extOuter, true);
             const outerRailGeo = new THREE.ExtrudeGeometry(shapeOuter, { depth: 0.2, bevelEnabled: false, curveSegments: 32 });
-            outerRailGeo.rotateZ(Math.PI); outerRailGeo.rotateX(Math.PI/2); outerRailGeo.translate(1, 0.3, 1);
+            outerRailGeo.rotateZ(Math.PI); outerRailGeo.rotateX(Math.PI/2); outerRailGeo.translate(2, 0.3, 2);
 
             if (isLeft) {
                 [innerRailGeo, outerRailGeo].forEach(geo => {
@@ -442,17 +449,17 @@
             group.add(innerRail, outerRail);
 
             // --- Sleepers ---
-            for(let i=0; i<4; i++) {
-                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.3), matWood);
-                sleeper.position.set(0, 0.05, -0.75 + i*0.5);
+            for(let i=0; i<8; i++) {
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 0.4), matWood);
+                sleeper.position.set(0, 0.06, -1.75 + i*0.5);
                 sleeper.castShadow = true; sleeper.receiveShadow = true;
                 group.add(sleeper);
             }
-            for(let a = Math.PI + 0.5; a < Math.PI*1.5; a += 0.35) {
-                const sx = 1 + Math.cos(a) * 1;
-                const sz = 1 + Math.sin(a) * 1;
-                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.3), matWood);
-                sleeper.position.set(isLeft ? -sx : sx, 0.05, sz);
+            for(let a = Math.PI + 0.5; a < Math.PI*1.5; a += 0.2) {
+                const sx = 2 + Math.cos(a) * 2;
+                const sz = 2 + Math.sin(a) * 2;
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.12, 0.4), matWood);
+                sleeper.position.set(isLeft ? -sx : sx, 0.06, sz);
                 sleeper.rotation.y = isLeft ? a : -a;
                 sleeper.castShadow = true; sleeper.receiveShadow = true;
                 group.add(sleeper);
@@ -460,12 +467,12 @@
 
             // --- Switch Stand & Lever ---
             const stand = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.2), matSwitchStand);
-            stand.position.set(isLeft ? 0.8 : -0.8, 0.1, 0.8);
+            stand.position.set(isLeft ? 1.6 : -1.6, 0.1, 1.6);
             stand.castShadow = true;
             group.add(stand);
 
             const leverPivot = new THREE.Group();
-            leverPivot.position.set(isLeft ? 0.8 : -0.8, 0.175, 0.8);
+            leverPivot.position.set(isLeft ? 1.6 : -1.6, 0.175, 1.6);
 
             const matRed = new THREE.MeshStandardMaterial({color: 0xff3333, roughness: 0.5});
             const matGreen = new THREE.MeshStandardMaterial({color: 0x33ff33, roughness: 0.5});
@@ -756,9 +763,11 @@
 
         // Returns { exitDir, fn(progress, cx, cz) -> {x, z, rotY} }
         function getPathInfo(type, rotation, enterDir, switchState = 0) {
+            const H = state.tileSize / 2; // half-tile scale factor
+
             const getLinear = (startX, startZ, endX, endZ) => (t, cx, cz) => {
-                const x = cx + startX + t * (endX - startX);
-                const z = cz + startZ + t * (endZ - startZ);
+                const x = cx + startX * H + t * (endX - startX) * H;
+                const z = cz + startZ * H + t * (endZ - startZ) * H;
                 const dx = endX - startX;
                 const dz = endZ - startZ;
                 return { x, z, rotY: Math.atan2(-dx, -dz) };
@@ -766,8 +775,8 @@
 
             const getCurve = (centerX, centerZ, startA, endA) => (t, cx, cz) => {
                 const a = startA + t * (endA - startA);
-                const x = cx + centerX + Math.cos(a);
-                const z = cz + centerZ + Math.sin(a);
+                const x = cx + centerX * H + Math.cos(a) * H;
+                const z = cz + centerZ * H + Math.sin(a) * H;
                 const dx = -Math.sin(a) * (endA - startA);
                 const dz = Math.cos(a) * (endA - startA);
                 return { x, z, rotY: Math.atan2(-dx, -dz) };
