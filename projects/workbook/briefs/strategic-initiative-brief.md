@@ -5,7 +5,8 @@
 **Status:** Draft
 **Owner:** Wintermute (Product Manager)
 **Last updated:** 2026-02-23
-**Related Feature Briefs:** [`whatsapp-ingestion.md`](whatsapp-ingestion.md), [`trust-engine.md`](trust-engine.md), [`worker-payments.md`](worker-payments.md)
+**Feature List:** [`features.md`](features.md)
+**Feature Briefs:** [`whatsapp-ingestion.md`](whatsapp-ingestion.md), [`trust-engine.md`](trust-engine.md), [`worker-payments.md`](worker-payments.md)
 
 ---
 
