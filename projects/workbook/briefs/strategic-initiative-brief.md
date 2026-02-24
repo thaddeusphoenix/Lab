@@ -1,11 +1,11 @@
 # Strategic Initiative Brief: Workbook
 
-> A Dynamic Reputation Marketplace that turns a skilled worker's daily job site photos into a verified, portable proof-of-work record — giving labor career mobility and giving contractors a trusted, verified-only hiring pool.
+> A WhatsApp-native operating system for the trades — where skilled workers build a verified proof-of-work portfolio, agree on job scope and price, and get paid reliably.
 
 **Status:** Draft
 **Owner:** Wintermute (Product Manager)
 **Last updated:** 2026-02-23
-**Related Feature Briefs:** [`whatsapp-ingestion.md`](whatsapp-ingestion.md), [`trust-engine.md`](trust-engine.md)
+**Related Feature Briefs:** [`whatsapp-ingestion.md`](whatsapp-ingestion.md), [`trust-engine.md`](trust-engine.md), [`worker-payments.md`](worker-payments.md)
 
 ---
 
@@ -31,11 +31,11 @@ The moat is not the interface — it's the data and the network. Every verified 
 
 ## What We're Building
 
-A two-sided marketplace anchored in Proof of Work. Workers interact exclusively via WhatsApp: they send Before, Progress, and Completed photos tagged to a job. An AI Trust Engine analyzes visual consistency, validates EXIF metadata, and enables peer verification from co-workers on the same site. This builds a verified portfolio — a Reference Book — attached to the worker's phone number. General Contractors access a verified-only labor pool and, as a secondary benefit, receive automated daily logs and compliance-ready photo records as a byproduct of the same worker behavior.
+A WhatsApp-native platform that serves the full job lifecycle for a skilled trades worker. Workers document their work with Before, Progress, and Completed photos — an AI Trust Engine verifies the record and builds a portable Reference Book. Before a job starts, the worker can agree on scope, price, and start date via WhatsApp and have that agreement confirmed by the client in writing. When the job is complete, the bot offers to invoice the client directly and tracks payment status — all without leaving the conversation. Contractors and homeowners access verified workers through the marketplace; the worker's phone number is their account across all of it.
 
 ## What We're Not Doing
 
-- Not building a scheduling, dispatch, or payroll tool
+- Not building payroll, tax handling, or employment classification tooling
 - Not targeting white-collar, office, or remote workers
 - Not replacing HR systems or integrating with ATS platforms in this phase
 - Not building a native mobile app — the interface is WhatsApp, full stop
@@ -46,12 +46,13 @@ A two-sided marketplace anchored in Proof of Work. Workers interact exclusively 
 |---|---|---|
 | Verified workers with 10+ records in their Reference Book | 500 | 6 months post-launch |
 | Monthly worker retention (active photo submissions) | ≥ 40% | 6 months post-launch |
-| Paying GC accounts accessing the verified labor pool | 10 | 12 months post-launch |
+| Jobs invoiced through Workbook (vs. off-platform) | ≥ 50% of completed jobs | 6 months post-launch |
+| Paying GC or homeowner accounts sourcing through the marketplace | 10 | 12 months post-launch |
 
 ## Biggest Unknowns
 
 1. **Can the AI Trust Engine work in the real world?** Construction sites are messy, lighting is poor, and fraud is motivated. Does computer vision produce reliable quality signals in these conditions — or does it produce noise that erodes trust in the verification?
 
-2. **Will workers send photos consistently after onboarding?** The value to the worker (career mobility, new opportunities) is deferred. The behavior required (tagging and sending photos daily) is ongoing. What is the retention mechanism strong enough to sustain participation without a direct, immediate reward?
+2. **Will clients pay through Workbook rather than cash?** Workers want to use the payment flow — the incentive is clear. But the client has to cooperate. Many homeowners and small contractors prefer cash for informal work. Does the convenience of a payment link change their behavior, or do we hit a ceiling where the client side opts out regardless?
 
 3. **What is the GC's actual evidence threshold?** Before a contractor pays for or acts on a Workbook verification, what level of proof do they need to trust it? And who inside the GC organization is the actual buyer — the foreman, the HR team, the owner?
