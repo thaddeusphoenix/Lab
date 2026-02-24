@@ -97,8 +97,35 @@ Both documents live in the project directory, typically at `projects/<project-na
 
 The brief is the first artifact created in Discover and the last thing updated before moving to Build. If the team cannot align on the brief, they are not ready to build.
 
+## Skills
+
+Skills are modular, reusable workflows for recurring actions in the lab. Each skill lives in its own directory under `skills/` as a `SKILL.md` file.
+
+A skill is not a checklist — it is a pipeline with distinct stages. Every skill follows the same five-stage structure: **Gather → Explore → Discuss → Plan → Document.** Each stage has a purpose and a set of questions or actions. The goal is to move quickly and purposefully, not to be exhaustive.
+
+| Skill | File | Use when |
+|---|---|---|
+| Write a Brief | `skills/write-a-brief/SKILL.md` | Starting a project or feature and need to capture problem + direction before building |
+| Run Discovery | `skills/run-discovery/SKILL.md` | Opening a new project or moving through the Discover phase |
+| Create a Prototype | `skills/create-prototype/SKILL.md` | A decision is uncertain or an assumption needs to be tested before building |
+
+### Skill File Format
+
+Each `SKILL.md` starts with YAML frontmatter:
+
+```yaml
+---
+name: skill-name
+description: Use when [trigger condition]. [One sentence on what it produces.]
+---
+```
+
+The description must be trigger-oriented — it tells the reader *when* to reach for the skill, not just *what* it is. Content follows: Quick Start → Workflow (Gather → Explore → Discuss → Plan → Document) → Checklist. Keep it under 100 lines.
+
+When a decision feels uncertain or a debate is going in circles, look for a skill before writing more prose.
+
 ## Repo Conventions
 
-- **Monorepo layout:** `team/` for persona definitions, `projects/` for individual project directories, `templates/` for document templates
+- **Monorepo layout:** `team/` for persona definitions, `projects/` for individual project directories, `templates/` for document templates, `skills/` for reusable workflow skills
 - **File naming:** kebab-case for all files and directories (e.g., `sales-engineering-lead.md`, `my-project/`)
 - **Commits:** Use concise commit messages that focus on the "why" rather than the "what"
