@@ -5,6 +5,7 @@ A Dynamic Reputation Marketplace for skilled labor. Workers send Before/Progress
 **Phase: Discover**
 **Brief:** [`briefs/strategic-initiative-brief.md`](briefs/strategic-initiative-brief.md)
 **Features:** [`briefs/features.md`](briefs/features.md)
+**User Personas:** [`discover/persona-marco.md`](discover/persona-marco.md), [`discover/persona-luis.md`](discover/persona-luis.md)
 
 ## Problem
 
