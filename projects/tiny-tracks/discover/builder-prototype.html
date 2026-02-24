@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Tracks - Model Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import Three.js as ES modules -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111827; user-select: none; }
+        canvas { display: block; outline: none; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+
+        .tool-btn {
+            transition: all 0.15s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .tool-btn:hover { background-color: #374151; }
+        .tool-btn.active {
+            border-color: #3B82F6;
+            background-color: rgba(59, 130, 246, 0.2);
+            box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        #ui-panel { pointer-events: auto; }
+        #canvas-container { pointer-events: auto; }
+    </style>
+</head>
+<body class="text-gray-200 antialiased font-sans">
+
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-btn" class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md shadow-lg border border-gray-600 md:hidden">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+
+    <!-- UI Overlay -->
+    <div id="ui-panel" class="fixed top-0 left-0 h-full w-72 bg-gray-900 bg-opacity-95 border-r border-gray-700 shadow-2xl z-40 flex flex-col backdrop-blur-md overflow-hidden transition-transform duration-300 transform -translate-x-full md:translate-x-0">
+
+        <!-- Header -->
+        <div class="p-5 border-b border-gray-800 bg-gray-950">
+            <h1 class="text-2xl font-bold text-blue-400 tracking-tight flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Tiny Tracks
+            </h1>
+            <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider font-semibold">Model Builder Simulator</p>
+        </div>
+
+        <!-- Tools Container -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-6">
+
+            <!-- Painting -->
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Terrain Painting</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="tool-btn active flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="paint-grass">
+                        <div class="w-6 h-6 rounded-full mb-2 border border-gray-600 shadow-inner" style="background-color: #4d7a4d;"></div>
+                        <span class="text-xs">Flock (Grass)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="paint-dirt">
+                        <div class="w-6 h-6 rounded-full mb-2 border border-gray-600 shadow-inner" style="background-color: #6b5428;"></div>
+                        <span class="text-xs">Earth (Dirt)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="paint-gravel">
+                        <div class="w-6 h-6 rounded-full mb-2 border border-gray-600 shadow-inner" style="background-color: #888888;"></div>
+                        <span class="text-xs">Ballast</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="paint-water">
+                        <div class="w-6 h-6 rounded-full mb-2 border border-gray-600 shadow-inner" style="background-color: #3b82f6;"></div>
+                        <span class="text-xs">Resin Water</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tracks -->
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Track Pieces</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-straight" data-rotation="0">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 2v20M15 2v20"/></svg>
+                        <span class="text-xs text-center leading-tight">Straight<br>(NS)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-straight" data-rotation="1">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M2 9h20M2 15h20"/></svg>
+                        <span class="text-xs text-center leading-tight">Straight<br>(EW)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-curve" data-rotation="2">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M 15 0 A 15 15 0 0 1 0 15 M 9 0 A 9 9 0 0 1 0 9"/></svg>
+                        <span class="text-xs text-center leading-tight">Curve<br>(NW)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-curve" data-rotation="1">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M 9 0 A 15 15 0 0 0 24 15 M 15 0 A 9 9 0 0 0 24 9"/></svg>
+                        <span class="text-xs text-center leading-tight">Curve<br>(NE)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-curve" data-rotation="3">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M 15 24 A 15 15 0 0 0 0 9 M 9 24 A 9 9 0 0 0 0 15"/></svg>
+                        <span class="text-xs text-center leading-tight">Curve<br>(SW)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-curve" data-rotation="0">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M 9 24 A 15 15 0 0 1 24 9 M 15 24 A 9 9 0 0 1 24 15"/></svg>
+                        <span class="text-xs text-center leading-tight">Curve<br>(SE)</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800 col-span-2" data-tool="track-cross">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 2v20M15 2v20M2 9h20M2 15h20"/></svg>
+                        <span class="text-xs">Crossing</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-switch-left" data-rotation="0">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 2v20 M12 12 A 8 8 0 0 1 4 20"/></svg>
+                        <span class="text-xs text-center leading-tight">Switch<br>Left</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="track-switch-right" data-rotation="0">
+                        <svg class="w-8 h-8 mb-1 text-gray-300" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 2v20 M12 12 A 8 8 0 0 0 20 20"/></svg>
+                        <span class="text-xs text-center leading-tight">Switch<br>Right</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vehicles -->
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Vehicles</h2>
+                <div class="grid grid-cols-1 gap-2">
+                    <button class="tool-btn flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-800" data-tool="place-train">
+                        <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c-4 0-4 3-4 3v11h8V5s0-3-4-3zm2 4a1 1 0 11-2 0 1 1 0 012 0zm-5 8v2h10v-2H9zm-2 3v2h14v-2H7zm-2 3v2h18v-2H5z"/></svg>
+                        <span class="text-sm font-bold">Locomotive</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scenery -->
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Scenery</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="scenery-pine">
+                        <svg class="w-8 h-8 mb-1 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4 12h3v8h10v-8h3L12 2z"/></svg>
+                        <span class="text-xs">Pine Tree</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="scenery-tree">
+                        <svg class="w-8 h-8 mb-1 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V22h8v-7.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z"/></svg>
+                        <span class="text-xs">Oak Tree</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="scenery-house">
+                        <svg class="w-8 h-8 mb-1 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        <span class="text-xs">Cottage</span>
+                    </button>
+                    <button class="tool-btn flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800" data-tool="scenery-rock">
+                        <svg class="w-8 h-8 mb-1 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M16 4l-4-2-4 2-3 5 2 9h10l2-9-3-5z"/></svg>
+                        <span class="text-xs">Boulder</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-2 border-t border-gray-800">
+                <button class="tool-btn flex w-full items-center justify-center gap-2 p-3 rounded-lg bg-blue-900 bg-opacity-40 hover:bg-blue-800 text-blue-300 border border-blue-900 mb-2" data-tool="toggle-switch">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    <span class="text-sm font-semibold">Toggle Switch</span>
+                </button>
+                <button class="tool-btn flex w-full items-center justify-center gap-2 p-3 rounded-lg bg-red-900 bg-opacity-40 hover:bg-red-800 text-red-300 border border-red-900" data-tool="delete">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span class="text-sm font-semibold">Remove Object</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Controls Legend -->
+        <div class="p-4 bg-gray-950 text-xs text-gray-500 border-t border-gray-800 space-y-1.5">
+            <p class="flex justify-between"><span>Tap / Left Click:</span> <span class="text-gray-300">Paint / Place</span></p>
+            <p class="flex justify-between"><span>1-Finger Drag:</span> <span class="text-gray-300">Rotate View</span></p>
+            <p class="flex justify-between"><span>2-Finger Pinch:</span> <span class="text-gray-300">Zoom</span></p>
+            <p class="flex justify-between text-blue-400 font-bold mt-2 pt-2 border-t border-gray-800">
+                <span>'R' or FAB Button</span> <span>Rotate Item</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Rotate FAB (Floating Action Button) for Touch -->
+    <button id="rotate-fab" class="fixed bottom-6 right-6 z-30 p-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] border-2 border-blue-400 active:scale-95 transition-transform">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    </button>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container" class="absolute top-0 left-0 w-full h-full"></div>
+
+    <!-- Application Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Application State ---
+        const state = {
+            activeTool: 'paint-grass',
+            rotationIndex: 0,
+            gridSize: 20,
+            tileSize: 2,
+            trackMap: new Map(), // Logical mapping of "x,z" to track info
+            trains: []           // Active train entities
+        };
+
+        const terrainColors = {
+            'paint-grass': 0x4d7a4d,
+            'paint-dirt': 0x6b5428,
+            'paint-gravel': 0x888888,
+            'paint-water': 0x3b82f6
+        };
+
+        const gridMeshes = [];
+        const placedObjects = new Map();
+
+        // --- Setup Three.js Scene ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+        scene.fog = new THREE.Fog(0x1a1a1a, 30, 80);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(-20, 25, 25);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const clock = new THREE.Clock();
+
+        // --- Controls ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2.1;
+        controls.minDistance = 10;
+        controls.maxDistance = 60;
+        controls.mouseButtons = {
+            LEFT: null,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.ROTATE
+        };
+
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(20, 40, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 100;
+        dirLight.shadow.camera.left = -25;
+        dirLight.shadow.camera.right = 25;
+        dirLight.shadow.camera.top = 25;
+        dirLight.shadow.camera.bottom = -25;
+        dirLight.shadow.bias = -0.001;
+        scene.add(dirLight);
+
+        const backLight = new THREE.DirectionalLight(0x88bbff, 0.4);
+        backLight.position.set(-20, 20, -20);
+        scene.add(backLight);
+
+        // --- Materials ---
+        const matWood = new THREE.MeshStandardMaterial({ color: 0x4a3018, roughness: 0.8 });
+        const matTableWood = new THREE.MeshStandardMaterial({ color: 0x2c1e16, roughness: 0.9 });
+        const matFoamSide = new THREE.MeshStandardMaterial({ color: 0x4B5563, roughness: 1.0 });
+        const matMetal = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, metalness: 0.8, roughness: 0.3 });
+        const matLeavesPine = new THREE.MeshStandardMaterial({ color: 0x2d4c2d, roughness: 0.9 });
+        const matLeavesOak = new THREE.MeshStandardMaterial({ color: 0x4a7c2a, roughness: 0.9 });
+        const matHouseWall = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 1.0 });
+        const matHouseRoof = new THREE.MeshStandardMaterial({ color: 0x993333, roughness: 0.8 });
+        const matRock = new THREE.MeshStandardMaterial({ color: 0x7c7c7c, roughness: 0.9, flatShading: true });
+        const matSwitchStand = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+
+        // --- Environment Generation ---
+        const tableGeo = new THREE.BoxGeometry(100, 2, 80);
+        const table = new THREE.Mesh(tableGeo, matTableWood);
+        table.position.y = -3;
+        table.receiveShadow = true;
+        scene.add(table);
+
+        const boardSize = state.gridSize * state.tileSize;
+        const boardBaseGeo = new THREE.BoxGeometry(boardSize + 0.4, 2, boardSize + 0.4);
+        const boardBase = new THREE.Mesh(boardBaseGeo, matFoamSide);
+        boardBase.position.y = -1.0;
+        boardBase.castShadow = true;
+        boardBase.receiveShadow = true;
+        scene.add(boardBase);
+
+        const objectsGroup = new THREE.Group();
+        scene.add(objectsGroup);
+
+        const tileGeo = new THREE.BoxGeometry(state.tileSize - 0.05, 0.2, state.tileSize - 0.05);
+        const offset = (boardSize / 2) - (state.tileSize / 2);
+
+        for (let x = 0; x < state.gridSize; x++) {
+            for (let z = 0; z < state.gridSize; z++) {
+                const mat = new THREE.MeshStandardMaterial({ color: terrainColors['paint-grass'], roughness: 1.0 });
+                const tile = new THREE.Mesh(tileGeo, mat);
+                tile.position.x = (x * state.tileSize) - offset;
+                tile.position.y = 0.1;
+                tile.position.z = (z * state.tileSize) - offset;
+                tile.receiveShadow = true;
+                tile.userData = { gridX: x, gridZ: z }; // Store logical grid coordinates
+                scene.add(tile);
+                gridMeshes.push(tile);
+            }
+        }
+
+        // --- Model Factories ---
+        function createStraightTrack() {
+            const group = new THREE.Group();
+            for(let i=0; i<4; i++) {
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.3), matWood);
+                sleeper.position.set(0, 0.05, -0.75 + i*0.5);
+                sleeper.castShadow = true; sleeper.receiveShadow = true;
+                group.add(sleeper);
+            }
+            const railL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            railL.position.set(-0.5, 0.2, 0);
+            railL.castShadow = true; railL.receiveShadow = true;
+            const railR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            railR.position.set(0.5, 0.2, 0);
+            railR.castShadow = true; railR.receiveShadow = true;
+            group.add(railL, railR);
+            return group;
+        }
+
+        function createCrossTrack() {
+            const group = new THREE.Group();
+            const track1 = createStraightTrack();
+            const track2 = createStraightTrack();
+            track2.rotation.y = Math.PI / 2;
+            group.add(track1, track2);
+            return group;
+        }
+
+        function createCurveTrack() {
+            const group = new THREE.Group();
+            const extInner = 0.05;
+            const shapeInner = new THREE.Shape();
+            shapeInner.moveTo(Math.cos(-extInner)*0.55, Math.sin(-extInner)*0.55);
+            shapeInner.absarc(0, 0, 0.55, -extInner, Math.PI/2 + extInner, false);
+            shapeInner.lineTo(Math.cos(Math.PI/2 + extInner)*0.45, Math.sin(Math.PI/2 + extInner)*0.45);
+            shapeInner.absarc(0, 0, 0.45, Math.PI/2 + extInner, -extInner, true);
+
+            const innerRailGeo = new THREE.ExtrudeGeometry(shapeInner, { depth: 0.2, bevelEnabled: false, curveSegments: 16 });
+            const innerRail = new THREE.Mesh(innerRailGeo, matMetal);
+            innerRail.position.set(1, 0.3, 1);
+            innerRail.rotation.x = Math.PI/2;
+            innerRail.rotation.z = Math.PI;
+            innerRail.castShadow = true; innerRail.receiveShadow = true;
+
+            const extOuter = 0.017;
+            const shapeOuter = new THREE.Shape();
+            shapeOuter.moveTo(Math.cos(-extOuter)*1.55, Math.sin(-extOuter)*1.55);
+            shapeOuter.absarc(0, 0, 1.55, -extOuter, Math.PI/2 + extOuter, false);
+            shapeOuter.lineTo(Math.cos(Math.PI/2 + extOuter)*1.45, Math.sin(Math.PI/2 + extOuter)*1.45);
+            shapeOuter.absarc(0, 0, 1.45, Math.PI/2 + extOuter, -extOuter, true);
+
+            const outerRailGeo = new THREE.ExtrudeGeometry(shapeOuter, { depth: 0.2, bevelEnabled: false, curveSegments: 32 });
+            const outerRail = new THREE.Mesh(outerRailGeo, matMetal);
+            outerRail.position.set(1, 0.3, 1);
+            outerRail.rotation.x = Math.PI/2;
+            outerRail.rotation.z = Math.PI;
+            outerRail.castShadow = true; outerRail.receiveShadow = true;
+
+            group.add(innerRail, outerRail);
+
+            for(let a = Math.PI + 0.2; a < Math.PI*1.5; a += 0.35) {
+                const sx = 1 + Math.cos(a) * 1;
+                const sz = 1 + Math.sin(a) * 1;
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.3), matWood);
+                sleeper.position.set(sx, 0.05, sz);
+                sleeper.rotation.y = -a;
+                sleeper.castShadow = true; sleeper.receiveShadow = true;
+                group.add(sleeper);
+            }
+            return group;
+        }
+
+        function createSwitch(isLeft) {
+            const group = new THREE.Group();
+
+            // --- Straight Rails ---
+            const railL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            railL.position.set(-0.5, 0.2, 0);
+            const railR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 2.05), matMetal);
+            railR.position.set(0.5, 0.2, 0);
+            railL.castShadow = railL.receiveShadow = railR.castShadow = railR.receiveShadow = true;
+            group.add(railL, railR);
+
+            // --- Curve Rails ---
+            const extInner = 0.05;
+            const shapeInner = new THREE.Shape();
+            shapeInner.moveTo(Math.cos(-extInner)*0.55, Math.sin(-extInner)*0.55);
+            shapeInner.absarc(0, 0, 0.55, -extInner, Math.PI/2 + extInner, false);
+            shapeInner.lineTo(Math.cos(Math.PI/2 + extInner)*0.45, Math.sin(Math.PI/2 + extInner)*0.45);
+            shapeInner.absarc(0, 0, 0.45, Math.PI/2 + extInner, -extInner, true);
+            const innerRailGeo = new THREE.ExtrudeGeometry(shapeInner, { depth: 0.2, bevelEnabled: false, curveSegments: 16 });
+            innerRailGeo.rotateZ(Math.PI); innerRailGeo.rotateX(Math.PI/2); innerRailGeo.translate(1, 0.3, 1);
+
+            const extOuter = 0.017;
+            const shapeOuter = new THREE.Shape();
+            shapeOuter.moveTo(Math.cos(-extOuter)*1.55, Math.sin(-extOuter)*1.55);
+            shapeOuter.absarc(0, 0, 1.55, -extOuter, Math.PI/2 + extOuter, false);
+            shapeOuter.lineTo(Math.cos(Math.PI/2 + extOuter)*1.45, Math.sin(Math.PI/2 + extOuter)*1.45);
+            shapeOuter.absarc(0, 0, 1.45, Math.PI/2 + extOuter, -extOuter, true);
+            const outerRailGeo = new THREE.ExtrudeGeometry(shapeOuter, { depth: 0.2, bevelEnabled: false, curveSegments: 32 });
+            outerRailGeo.rotateZ(Math.PI); outerRailGeo.rotateX(Math.PI/2); outerRailGeo.translate(1, 0.3, 1);
+
+            if (isLeft) {
+                [innerRailGeo, outerRailGeo].forEach(geo => {
+                    const pos = geo.attributes.position;
+                    for(let i=0; i<pos.count; i++) pos.setX(i, -pos.getX(i));
+                    if (geo.index) {
+                        const idx = geo.index;
+                        for(let i=0; i<idx.count; i+=3) {
+                            const a = idx.getX(i), b = idx.getX(i+1), c = idx.getX(i+2);
+                            idx.setX(i, a); idx.setX(i+1, c); idx.setX(i+2, b);
+                        }
+                    }
+                    geo.computeVertexNormals();
+                });
+            }
+
+            const innerRail = new THREE.Mesh(innerRailGeo, matMetal);
+            const outerRail = new THREE.Mesh(outerRailGeo, matMetal);
+            innerRail.castShadow = innerRail.receiveShadow = outerRail.castShadow = outerRail.receiveShadow = true;
+            group.add(innerRail, outerRail);
+
+            // --- Sleepers ---
+            for(let i=0; i<4; i++) {
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.3), matWood);
+                sleeper.position.set(0, 0.05, -0.75 + i*0.5);
+                sleeper.castShadow = true; sleeper.receiveShadow = true;
+                group.add(sleeper);
+            }
+            for(let a = Math.PI + 0.5; a < Math.PI*1.5; a += 0.35) {
+                const sx = 1 + Math.cos(a) * 1;
+                const sz = 1 + Math.sin(a) * 1;
+                const sleeper = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.3), matWood);
+                sleeper.position.set(isLeft ? -sx : sx, 0.05, sz);
+                sleeper.rotation.y = isLeft ? a : -a;
+                sleeper.castShadow = true; sleeper.receiveShadow = true;
+                group.add(sleeper);
+            }
+
+            // --- Switch Stand & Lever ---
+            const stand = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.2), matSwitchStand);
+            stand.position.set(isLeft ? 0.8 : -0.8, 0.1, 0.8);
+            stand.castShadow = true;
+            group.add(stand);
+
+            const leverPivot = new THREE.Group();
+            leverPivot.position.set(isLeft ? 0.8 : -0.8, 0.175, 0.8);
+
+            const matRed = new THREE.MeshStandardMaterial({color: 0xff3333, roughness: 0.5});
+            const matGreen = new THREE.MeshStandardMaterial({color: 0x33ff33, roughness: 0.5});
+
+            const leverHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.25), matMetal);
+            leverHandle.position.y = 0.125;
+            leverPivot.add(leverHandle);
+
+            const indicator = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.02), matRed);
+            indicator.rotation.x = Math.PI/2;
+            indicator.position.y = 0.25;
+            leverPivot.add(indicator);
+
+            leverPivot.rotation.x = Math.PI/4; // Default straight position
+
+            group.add(leverPivot);
+            group.userData = { lever: leverPivot, matRed, matGreen, indicator };
+
+            return group;
+        }
+
+        function createLocomotive() {
+            const group = new THREE.Group();
+
+            // Southern Pacific Livery Colors
+            const matSPGray = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 }); // Very dark gray
+            const matSPRed = new THREE.MeshStandardMaterial({ color: 0xbf1a1a, roughness: 0.7 });  // Scarlet "Bloody" Red
+            const matChassis = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+            const matWindow = new THREE.MeshStandardMaterial({ color: 0x050a14, roughness: 0.2, metalness: 0.8 });
+            const matDetail = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.6 });
+            const matYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.4 }); // For handrails/accents
+
+            // 1. Main Walkway / Chassis (Dark / Black)
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 2.3), matChassis);
+            chassis.position.y = 0.35;
+            chassis.castShadow = true;
+            group.add(chassis);
+
+            // 2. Short Hood / Nose (Front, painted SP Red)
+            const nose = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 0.35), matSPRed);
+            nose.position.set(0, 0.625, -0.95);
+            nose.castShadow = true;
+            group.add(nose);
+
+            // 3. Cab (SP Gray)
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.75, 0.4), matSPGray);
+            cab.position.set(0, 0.775, -0.575);
+            cab.castShadow = true;
+            group.add(cab);
+
+            // 4. Long Hood / Engine Bay (SP Gray)
+            const longHood = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 1.45), matSPGray);
+            longHood.position.set(0, 0.725, 0.35);
+            longHood.castShadow = true;
+            group.add(longHood);
+
+            // 5. Windows (Wrap around the cab)
+            const frontWindow = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.25, 0.42), matWindow);
+            frontWindow.position.set(0, 0.95, -0.575);
+            group.add(frontWindow);
+
+            // 6. Fuel Tank (Slung underneath center)
+            const fuelTank = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.8), matChassis);
+            fuelTank.position.set(0, 0.225, 0);
+            group.add(fuelTank);
+
+            // 7. 6-Axle Trucks (3 axles front, 3 axles rear)
+            const truckZPositions = [-0.65, 0.65];
+            for (let tz of truckZPositions) {
+                // Truck frame
+                const truck = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.1, 0.7), matChassis);
+                truck.position.set(0, 0.25, tz);
+                group.add(truck);
+
+                // Axles/Wheels
+                for (let x of [-0.4, 0.4]) {
+                    for (let zOffset of [-0.25, 0, 0.25]) {
+                        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.06, 16), matDetail);
+                        wheel.rotation.z = Math.PI / 2;
+                        wheel.position.set(x, 0.12, tz + zOffset);
+                        group.add(wheel);
+                    }
+                }
+            }
+
+            // 8. Details (Headlight, Horn, Exhaust)
+            const headlight = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.05), matWindow);
+            headlight.position.set(0, 0.75, -1.15); // Nose headlight
+            group.add(headlight);
+
+            const horn = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.2), matDetail);
+            horn.position.set(0, 1.18, -0.6); // Top of cab
+            group.add(horn);
+
+            const exhaust = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.15), matChassis);
+            exhaust.position.set(0, 1.08, 0.2); // Top of long hood
+            group.add(exhaust);
+
+            // Yellow Warning Stripes / Sill on the nose tip
+            const noseStripe = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.05, 0.05), matYellow);
+            noseStripe.position.set(0, 0.425, -1.13);
+            group.add(noseStripe);
+
+            return group;
+        }
+
+        function createPineTree() {
+            const group = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.8), matWood);
+            trunk.position.y = 0.4;
+            trunk.castShadow = true; trunk.receiveShadow = true;
+            const leaves1 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 7), matLeavesPine);
+            leaves1.position.y = 1.0;
+            leaves1.castShadow = true; leaves1.receiveShadow = true;
+            const leaves2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.0, 7), matLeavesPine);
+            leaves2.position.y = 1.6;
+            leaves2.castShadow = true; leaves2.receiveShadow = true;
+            group.add(trunk, leaves1, leaves2);
+            const scale = 0.8 + Math.random() * 0.4;
+            group.scale.set(scale, scale, scale);
+            return group;
+        }
+
+        function createOakTree() {
+            const group = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 1.0), matWood);
+            trunk.position.y = 0.5;
+            trunk.castShadow = true; trunk.receiveShadow = true;
+            const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8, 1), matLeavesOak);
+            leaves.position.y = 1.3;
+            leaves.scale.set(1, 0.8, 1);
+            leaves.castShadow = true; leaves.receiveShadow = true;
+            group.add(trunk, leaves);
+            const scale = 0.8 + Math.random() * 0.4;
+            group.scale.set(scale, scale, scale);
+            return group;
+        }
+
+        function createHouse() {
+            const group = new THREE.Group();
+            const base = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.0), matHouseWall);
+            base.position.y = 0.6;
+            base.castShadow = true; base.receiveShadow = true;
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(1.2, 0.8, 4), matHouseRoof);
+            roof.position.y = 1.6;
+            roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true; roof.receiveShadow = true;
+            const chimney = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), matHouseRoof);
+            chimney.position.set(0.4, 1.6, 0);
+            chimney.castShadow = true; chimney.receiveShadow = true;
+            group.add(base, roof, chimney);
+            return group;
+        }
+
+        function createRock() {
+            const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5, 0), matRock);
+            rock.position.y = 0.3;
+            rock.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+            rock.scale.set(1 + Math.random(), 0.5 + Math.random()*0.5, 1 + Math.random());
+            rock.castShadow = true; rock.receiveShadow = true;
+            return rock;
+        }
+
+        const models = {
+            'track-straight': createStraightTrack,
+            'track-curve': createCurveTrack,
+            'track-cross': createCrossTrack,
+            'track-switch-left': () => createSwitch(true),
+            'track-switch-right': () => createSwitch(false),
+            'place-train': createLocomotive,
+            'scenery-pine': createPineTree,
+            'scenery-tree': createOakTree,
+            'scenery-house': createHouse,
+            'scenery-rock': createRock
+        };
+
+        // --- Track Pathfinding Logic ---
+
+        // Directions: N=0, E=1, S=2, W=3
+        const getOpposite = (d) => (d + 2) % 4;
+
+        // Returns { exitDir, fn(progress, cx, cz) -> {x, z, rotY} }
+        function getPathInfo(type, rotation, enterDir, switchState = 0) {
+            const getLinear = (startX, startZ, endX, endZ) => (t, cx, cz) => {
+                const x = cx + startX + t * (endX - startX);
+                const z = cz + startZ + t * (endZ - startZ);
+                const dx = endX - startX;
+                const dz = endZ - startZ;
+                return { x, z, rotY: Math.atan2(-dx, -dz) };
+            };
+
+            const getCurve = (centerX, centerZ, startA, endA) => (t, cx, cz) => {
+                const a = startA + t * (endA - startA);
+                const x = cx + centerX + Math.cos(a);
+                const z = cz + centerZ + Math.sin(a);
+                const dx = -Math.sin(a) * (endA - startA);
+                const dz = Math.cos(a) * (endA - startA);
+                return { x, z, rotY: Math.atan2(-dx, -dz) };
+            };
+
+            if (type === 'track-straight') {
+                if (rotation === 0) { // NS
+                    if (enterDir === 2) return { exitDir: 0, fn: getLinear(0, 1, 0, -1) };
+                    if (enterDir === 0) return { exitDir: 2, fn: getLinear(0, -1, 0, 1) };
+                } else if (rotation === 1) { // EW
+                    if (enterDir === 3) return { exitDir: 1, fn: getLinear(-1, 0, 1, 0) };
+                    if (enterDir === 1) return { exitDir: 3, fn: getLinear(1, 0, -1, 0) };
+                }
+            } else if (type === 'track-curve') {
+                if (rotation === 0) { // SE
+                    if (enterDir === 2) return { exitDir: 1, fn: getCurve(1, 1, Math.PI, 1.5*Math.PI) };
+                    if (enterDir === 1) return { exitDir: 2, fn: getCurve(1, 1, 1.5*Math.PI, Math.PI) };
+                } else if (rotation === 1) { // NE
+                    if (enterDir === 1) return { exitDir: 0, fn: getCurve(1, -1, 0.5*Math.PI, Math.PI) };
+                    if (enterDir === 0) return { exitDir: 1, fn: getCurve(1, -1, Math.PI, 0.5*Math.PI) };
+                } else if (rotation === 2) { // NW
+                    if (enterDir === 0) return { exitDir: 3, fn: getCurve(-1, -1, 0, 0.5*Math.PI) };
+                    if (enterDir === 3) return { exitDir: 0, fn: getCurve(-1, -1, 0.5*Math.PI, 0) };
+                } else if (rotation === 3) { // SW
+                    if (enterDir === 3) return { exitDir: 2, fn: getCurve(-1, 1, 1.5*Math.PI, 2.0*Math.PI) };
+                    if (enterDir === 2) return { exitDir: 3, fn: getCurve(-1, 1, 2.0*Math.PI, 1.5*Math.PI) };
+                }
+            } else if (type === 'track-cross') {
+                if (enterDir === 2) return { exitDir: 0, fn: getLinear(0, 1, 0, -1) };
+                if (enterDir === 0) return { exitDir: 2, fn: getLinear(0, -1, 0, 1) };
+                if (enterDir === 3) return { exitDir: 1, fn: getLinear(-1, 0, 1, 0) };
+                if (enterDir === 1) return { exitDir: 3, fn: getLinear(1, 0, -1, 0) };
+            } else if (type === 'track-switch-right') {
+                const diverge = switchState === 1;
+                if (rotation === 0) {
+                    if (enterDir === 2) return diverge ? { exitDir: 1, fn: getCurve(1, 1, Math.PI, 1.5*Math.PI) } : { exitDir: 0, fn: getLinear(0, 1, 0, -1) };
+                    if (enterDir === 0) return { exitDir: 2, fn: getLinear(0, -1, 0, 1) };
+                    if (enterDir === 1) return { exitDir: 2, fn: getCurve(1, 1, 1.5*Math.PI, Math.PI) };
+                } else if (rotation === 1) {
+                    if (enterDir === 1) return diverge ? { exitDir: 0, fn: getCurve(1, -1, 0.5*Math.PI, Math.PI) } : { exitDir: 3, fn: getLinear(1, 0, -1, 0) };
+                    if (enterDir === 3) return { exitDir: 1, fn: getLinear(-1, 0, 1, 0) };
+                    if (enterDir === 0) return { exitDir: 1, fn: getCurve(1, -1, Math.PI, 0.5*Math.PI) };
+                } else if (rotation === 2) {
+                    if (enterDir === 0) return diverge ? { exitDir: 3, fn: getCurve(-1, -1, 0, 0.5*Math.PI) } : { exitDir: 2, fn: getLinear(0, -1, 0, 1) };
+                    if (enterDir === 2) return { exitDir: 0, fn: getLinear(0, 1, 0, -1) };
+                    if (enterDir === 3) return { exitDir: 0, fn: getCurve(-1, -1, 0.5*Math.PI, 0) };
+                } else if (rotation === 3) {
+                    if (enterDir === 3) return diverge ? { exitDir: 2, fn: getCurve(-1, 1, 1.5*Math.PI, 2.0*Math.PI) } : { exitDir: 1, fn: getLinear(-1, 0, 1, 0) };
+                    if (enterDir === 1) return { exitDir: 3, fn: getLinear(1, 0, -1, 0) };
+                    if (enterDir === 2) return { exitDir: 3, fn: getCurve(-1, 1, 2.0*Math.PI, 1.5*Math.PI) };
+                }
+            } else if (type === 'track-switch-left') {
+                const diverge = switchState === 1;
+                if (rotation === 0) {
+                    if (enterDir === 2) return diverge ? { exitDir: 3, fn: getCurve(-1, 1, 2.0*Math.PI, 1.5*Math.PI) } : { exitDir: 0, fn: getLinear(0, 1, 0, -1) };
+                    if (enterDir === 0) return { exitDir: 2, fn: getLinear(0, -1, 0, 1) };
+                    if (enterDir === 3) return { exitDir: 2, fn: getCurve(-1, 1, 1.5*Math.PI, 2.0*Math.PI) };
+                } else if (rotation === 1) {
+                    if (enterDir === 1) return diverge ? { exitDir: 0, fn: getCurve(1, 1, 1.5*Math.PI, Math.PI) } : { exitDir: 3, fn: getLinear(1, 0, -1, 0) };
+                    if (enterDir === 3) return { exitDir: 1, fn: getLinear(-1, 0, 1, 0) };
+                    if (enterDir === 0) return { exitDir: 1, fn: getCurve(1, 1, Math.PI, 1.5*Math.PI) };
+                } else if (rotation === 2) {
+                    if (enterDir === 0) return diverge ? { exitDir: 1, fn: getCurve(1, -1, Math.PI, 0.5*Math.PI) } : { exitDir: 2, fn: getLinear(0, -1, 0, 1) };
+                    if (enterDir === 2) return { exitDir: 0, fn: getLinear(0, 1, 0, -1) };
+                    if (enterDir === 1) return { exitDir: 0, fn: getCurve(1, -1, 0.5*Math.PI, Math.PI) };
+                } else if (rotation === 3) {
+                    if (enterDir === 3) return diverge ? { exitDir: 2, fn: getCurve(-1, -1, 0.5*Math.PI, 0) } : { exitDir: 1, fn: getLinear(-1, 0, 1, 0) };
+                    if (enterDir === 1) return { exitDir: 3, fn: getLinear(1, 0, -1, 0) };
+                    if (enterDir === 2) return { exitDir: 3, fn: getCurve(-1, -1, 0, 0.5*Math.PI) };
+                }
+            }
+
+            return null; // Invalid entry
+        }
+
+        function getDefaultEntry(type, rotation) {
+            if (type === 'track-straight') return rotation === 0 ? 2 : 3;
+            if (type === 'track-switch-left' || type === 'track-switch-right') {
+                if (rotation === 0) return 2;
+                if (rotation === 1) return 1;
+                if (rotation === 2) return 0;
+                if (rotation === 3) return 3;
+            }
+            if (type === 'track-curve') {
+                if (rotation === 0) return 2;
+                if (rotation === 1) return 1;
+                if (rotation === 2) return 0;
+                if (rotation === 3) return 3;
+            }
+            if (type === 'track-cross') return 2;
+            return 2;
+        }
+
+
+        // --- Interaction Setup ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        const ghostMat = new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.4, wireframe: true });
+        const ghostBox = new THREE.Mesh(new THREE.BoxGeometry(state.tileSize, 0.1, state.tileSize), ghostMat);
+        scene.add(ghostBox);
+
+        let currentGhostModel = null;
+
+        function updateGhostModel() {
+            if (currentGhostModel) {
+                scene.remove(currentGhostModel);
+                currentGhostModel = null;
+            }
+
+            if (state.activeTool.startsWith('paint') || state.activeTool === 'delete' || state.activeTool === 'toggle-switch') {
+                ghostBox.visible = true;
+                if(state.activeTool === 'delete') ghostMat.color.setHex(0xff0000);
+                else if(state.activeTool === 'toggle-switch') ghostMat.color.setHex(0xffff00);
+                else ghostMat.color.setHex(terrainColors[state.activeTool]);
+            } else if (models[state.activeTool]) {
+                ghostBox.visible = false;
+                currentGhostModel = models[state.activeTool]();
+
+                currentGhostModel.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x60A5FA, transparent: true, opacity: 0.6,
+                            emissive: 0x2563EB, emissiveIntensity: 0.2
+                        });
+                        child.castShadow = false; child.receiveShadow = false;
+                    }
+                });
+                scene.add(currentGhostModel);
+            }
+        }
+
+        updateGhostModel();
+
+        // --- Input Events ---
+
+        const uiPanel = document.getElementById('ui-panel');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            uiPanel.classList.toggle('-translate-x-full');
+        });
+
+        renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        window.addEventListener('mousemove', (e) => {
+            if(e.target.closest('#ui-panel') || e.target.closest('.fixed')) {
+                ghostBox.visible = false;
+                if(currentGhostModel) currentGhostModel.visible = false;
+                return;
+            }
+
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(gridMeshes);
+
+            if (intersects.length > 0) {
+                const targetTile = intersects[0].object;
+                const tx = targetTile.position.x;
+                const tz = targetTile.position.z;
+
+                if (state.activeTool.startsWith('paint') || state.activeTool === 'delete' || state.activeTool === 'toggle-switch') {
+                    ghostBox.visible = true;
+                    ghostBox.position.set(tx, 0.25, tz);
+                } else if (currentGhostModel) {
+                    currentGhostModel.visible = true;
+                    // Draw locomotive higher up
+                    currentGhostModel.position.set(tx, state.activeTool === 'place-train' ? 0.5 : 0.2, tz);
+                    if (state.activeTool !== 'place-train') {
+                        currentGhostModel.rotation.y = state.rotationIndex * (Math.PI / 2);
+                    }
+                }
+            } else {
+                ghostBox.visible = false;
+                if(currentGhostModel) currentGhostModel.visible = false;
+            }
+        });
+
+        // Touch-friendly tap vs drag detection
+        let pointerDownStart = { x: 0, y: 0, time: 0 };
+
+        window.addEventListener('pointerdown', (e) => {
+            pointerDownStart = { x: e.clientX, y: e.clientY, time: Date.now() };
+
+            // Pre-calculate raycaster to show ghost immediately on touch
+            if (e.pointerType === 'touch' && !e.target.closest('#ui-panel') && !e.target.closest('.fixed')) {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            }
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            // Ignore non-left clicks on mouse, or clicks on the UI
+            if ((e.button !== 0 && e.pointerType === 'mouse') || e.target.closest('#ui-panel') || e.target.closest('.fixed')) return;
+
+            // Calculate movement distance to differentiate between a tap (build) and drag (rotate camera)
+            const dist = Math.hypot(e.clientX - pointerDownStart.x, e.clientY - pointerDownStart.y);
+            const timeElapsed = Date.now() - pointerDownStart.time;
+
+            if (dist > 15 || timeElapsed > 500) return;
+
+            // Update mouse coordinates for touch devices before raycasting
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(gridMeshes);
+
+            if (intersects.length > 0) {
+                const targetTile = intersects[0].object;
+                const tileId = targetTile.uuid;
+                const gx = targetTile.userData.gridX;
+                const gz = targetTile.userData.gridZ;
+
+                if (state.activeTool.startsWith('paint')) {
+                    const color = terrainColors[state.activeTool];
+                    targetTile.material.color.setHex(color);
+                } else if (state.activeTool === 'delete') {
+                    if (placedObjects.has(tileId)) {
+                        objectsGroup.remove(placedObjects.get(tileId));
+                        placedObjects.delete(tileId);
+                        state.trackMap.delete(`${gx},${gz}`);
+                    }
+                    // Remove any trains located on this tile
+                    state.trains = state.trains.filter(t => {
+                        if (t.gridX === gx && t.gridZ === gz) {
+                            scene.remove(t.mesh);
+                            return false;
+                        }
+                        return true;
+                    });
+                } else if (state.activeTool === 'toggle-switch') {
+                    const trackInfo = state.trackMap.get(`${gx},${gz}`);
+                    if (trackInfo && trackInfo.type.startsWith('track-switch')) {
+                        trackInfo.switchState = trackInfo.switchState === 0 ? 1 : 0; // toggle
+
+                        // Visually update the lever
+                        const obj = placedObjects.get(tileId);
+                        if (obj && obj.userData.lever) {
+                            obj.userData.lever.rotation.x = trackInfo.switchState === 0 ? Math.PI/4 : -Math.PI/4;
+                            obj.userData.indicator.material = trackInfo.switchState === 0 ? obj.userData.matRed : obj.userData.matGreen;
+                        }
+                    }
+                } else if (state.activeTool === 'place-train') {
+                    const trackInfo = state.trackMap.get(`${gx},${gz}`);
+                    if (trackInfo) {
+                        const entryDir = getDefaultEntry(trackInfo.type, trackInfo.rotation);
+                        const pathInfo = getPathInfo(trackInfo.type, trackInfo.rotation, entryDir, trackInfo.switchState);
+
+                        if (pathInfo) {
+                            const newTrain = createLocomotive();
+                            scene.add(newTrain);
+                            state.trains.push({
+                                mesh: newTrain,
+                                gridX: gx,
+                                gridZ: gz,
+                                entryDir: entryDir,
+                                progress: 0.5,
+                                speed: 0.8, // tiles per second
+                                pathInfo: pathInfo
+                            });
+                        }
+                    }
+                } else if (models[state.activeTool]) {
+                    if (placedObjects.has(tileId)) {
+                        objectsGroup.remove(placedObjects.get(tileId));
+                        state.trackMap.delete(`${gx},${gz}`);
+                    }
+
+                    const newModel = models[state.activeTool]();
+                    newModel.position.copy(targetTile.position);
+                    newModel.position.y = 0.2;
+                    newModel.rotation.y = state.rotationIndex * (Math.PI / 2);
+
+                    objectsGroup.add(newModel);
+                    placedObjects.set(tileId, newModel);
+
+                    if (state.activeTool.startsWith('track-')) {
+                        state.trackMap.set(`${gx},${gz}`, {
+                            type: state.activeTool,
+                            rotation: state.rotationIndex,
+                            switchState: 0 // defaults to straight
+                        });
+                    }
+                }
+            }
+        });
+
+        function handleRotateItem() {
+            state.rotationIndex = (state.rotationIndex + 1) % 4;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(gridMeshes);
+            if (intersects.length > 0 && currentGhostModel && state.activeTool !== 'place-train') {
+                currentGhostModel.rotation.y = state.rotationIndex * (Math.PI / 2);
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'r' || e.key === 'R') {
+                handleRotateItem();
+            }
+        });
+
+        document.getElementById('rotate-fab').addEventListener('click', handleRotateItem);
+
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                const target = e.currentTarget;
+                target.classList.add('active');
+
+                state.activeTool = target.dataset.tool;
+                if (target.dataset.rotation !== undefined) {
+                    state.rotationIndex = parseInt(target.dataset.rotation);
+                }
+                updateGhostModel();
+
+                if (currentGhostModel && state.activeTool !== 'place-train') {
+                    currentGhostModel.rotation.y = state.rotationIndex * (Math.PI / 2);
+                }
+            });
+        });
+
+        // --- Render Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            controls.update();
+
+            // Update Trains
+            for (let i = state.trains.length - 1; i >= 0; i--) {
+                const train = state.trains[i];
+                if (train.speed <= 0) continue;
+
+                train.progress += train.speed * dt;
+
+                if (train.progress >= 1.0) {
+                    // Calculate next tile
+                    const nextGx = train.gridX + (train.pathInfo.exitDir === 1 ? 1 : train.pathInfo.exitDir === 3 ? -1 : 0);
+                    const nextGz = train.gridZ + (train.pathInfo.exitDir === 2 ? 1 : train.pathInfo.exitDir === 0 ? -1 : 0);
+
+                    const nextTrack = state.trackMap.get(`${nextGx},${nextGz}`);
+                    const nextEntryDir = getOpposite(train.pathInfo.exitDir);
+
+                    if (nextTrack) {
+                        const nextPathInfo = getPathInfo(nextTrack.type, nextTrack.rotation, nextEntryDir, nextTrack.switchState);
+                        if (nextPathInfo) {
+                            train.gridX = nextGx;
+                            train.gridZ = nextGz;
+                            train.entryDir = nextEntryDir;
+                            train.pathInfo = nextPathInfo;
+                            train.progress -= 1.0;
+                        } else {
+                            train.speed = 0; // Invalid connection - stop
+                            train.progress = 1.0;
+                        }
+                    } else {
+                        train.speed = 0; // Dead end - stop
+                        train.progress = 1.0;
+                    }
+                }
+
+                // Apply transforms
+                const cx = (train.gridX * state.tileSize) - offset;
+                const cz = (train.gridZ * state.tileSize) - offset;
+                const transform = train.pathInfo.fn(train.progress, cx, cz);
+
+                train.mesh.position.set(transform.x, 0.5, transform.z); // 0.5 is top of rails
+                train.mesh.rotation.y = transform.rotY;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- Resize Handler ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+    </script>
+</body>
+</html>
