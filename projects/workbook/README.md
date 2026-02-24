@@ -44,6 +44,7 @@ Following Marty Cagan's framework:
 
 | Artifact | Fidelity | Description |
 |---|---|---|
-| [`discover/whatsapp-flow.md`](discover/whatsapp-flow.md) | Paper | Scripted conversation flow — the full WhatsApp interaction written as Worker/Bot dialogue. |
-| [`discover/whatsapp-prototype.html`](discover/whatsapp-prototype.html) | Cardboard | Interactive mobile web page simulating the WhatsApp experience. Open in a phone browser. |
-| [`discover/workbook-profile.html`](discover/workbook-profile.html) | Cardboard | Public portfolio page — linked from the "share" flow in the WhatsApp prototype. |
+| [`discover/messages-prototype.html`](discover/messages-prototype.html) | Cardboard | iOS Messages-style interface — enrollment, scope agreement, invoice, and payment tracking. Open in a phone browser. |
+| [`discover/whatsapp-flow.md`](discover/whatsapp-flow.md) | Paper | Earlier scripted WhatsApp flow — reflects the photo-based portfolio direction, superseded. |
+| [`discover/whatsapp-prototype.html`](discover/whatsapp-prototype.html) | Cardboard | Earlier WhatsApp prototype — photo-based portfolio direction, superseded. |
+| [`discover/workbook-profile.html`](discover/workbook-profile.html) | Cardboard | Earlier public portfolio page — superseded. |

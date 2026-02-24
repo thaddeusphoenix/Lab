@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Workbook — Messages Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    background: #fff;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px 4px;
+    flex-shrink: 0;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: #000; letter-spacing: -0.3px; }
+  .status-icons { display: flex; align-items: center; gap: 7px; }
+
+  /* Nav bar */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    padding: 6px 16px 10px;
+    border-bottom: 0.5px solid #C6C6C8;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #007AFF;
+    font-size: 17px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .nav-contact {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .nav-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #30D158, #34AADC);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+  }
+  .nav-name { font-size: 12px; font-weight: 500; color: #000; }
+  .nav-right { flex-shrink: 0; width: 60px; display: flex; justify-content: flex-end; }
+
+  /* Fidelity badge */
+  .fidelity-badge {
+    background: #F2F2F7;
+    text-align: center;
+    padding: 5px;
+    font-size: 11px;
+    color: #8E8E93;
+    flex-shrink: 0;
+  }
+  .fidelity-badge b { color: #007AFF; font-weight: 600; }
+
+  /* Message list */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 6px 0 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .time-label {
+    text-align: center;
+    font-size: 12px;
+    color: #8E8E93;
+    font-weight: 400;
+    padding: 10px 0 4px;
+  }
+
+  .msg-row {
+    display: flex;
+    padding: 1px 10px;
+    animation: msgIn 0.18s ease;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .msg-row.out { justify-content: flex-end; }
+  .msg-row.in  { justify-content: flex-start; }
+
+  .bubble {
+    max-width: 78%;
+    padding: 9px 14px;
+    font-size: 16px;
+    line-height: 1.38;
+    word-break: break-word;
+    white-space: pre-line;
+  }
+  .bubble.out {
+    background: #007AFF;
+    color: #fff;
+    border-radius: 18px 18px 4px 18px;
+  }
+  .bubble.in {
+    background: #E5E5EA;
+    color: #000;
+    border-radius: 18px 18px 18px 4px;
+  }
+
+  /* Template block inside a bubble */
+  .template-block {
+    margin-top: 8px;
+    background: #fff;
+    border-left: 3px solid #30D158;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13.5px;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    line-height: 1.55;
+    color: #1C1C1E;
+    white-space: pre-wrap;
+  }
+
+  .delivered {
+    text-align: right;
+    font-size: 11px;
+    color: #8E8E93;
+    padding: 2px 14px 4px;
+  }
+
+  /* Typing */
+  .typing-row {
+    display: flex;
+    padding: 2px 10px;
+  }
+  .typing-bubble {
+    background: #E5E5EA;
+    border-radius: 18px 18px 18px 4px;
+    padding: 11px 16px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .typing-bubble span {
+    width: 7px; height: 7px;
+    background: #8E8E93;
+    border-radius: 50%;
+    animation: dot 1.2s infinite ease-in-out;
+  }
+  .typing-bubble span:nth-child(2) { animation-delay: 0.16s; }
+  .typing-bubble span:nth-child(3) { animation-delay: 0.32s; }
+  @keyframes dot {
+    0%, 55%, 100% { transform: translateY(0); }
+    27% { transform: translateY(-5px); }
+  }
+
+  /* Quick replies */
+  .quick-replies {
+    padding: 6px 10px 2px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .qr-btn {
+    background: #fff;
+    border: 1.5px solid #007AFF;
+    color: #007AFF;
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .qr-btn:active { background: #EAF3FF; }
+
+  /* Input bar */
+  .input-bar {
+    border-top: 0.5px solid #C6C6C8;
+    padding: 8px 10px 32px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .input-wrap {
+    flex: 1;
+    border: 1.5px solid #C6C6C8;
+    border-radius: 20px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap:focus-within { border-color: #007AFF; }
+  .input-field {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-family: inherit;
+    line-height: 1.35;
+    resize: none;
+    max-height: 88px;
+    background: transparent;
+    color: #000;
+  }
+  .input-field::placeholder { color: #C7C7CC; }
+  .send-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #007AFF;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 1px;
+    transition: background 0.15s;
+  }
+  .send-btn:disabled { background: #C7C7CC; cursor: default; }
+</style>
+</head>
+<body>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <span class="status-time" id="clock">9:41</span>
+  <div class="status-icons">
+    <!-- Signal -->
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="black">
+      <rect x="0"   y="5" width="3" height="6" rx="1"/>
+      <rect x="4.5" y="3" width="3" height="8" rx="1"/>
+      <rect x="9"   y="1" width="3" height="10" rx="1"/>
+      <rect x="13.5" y="0" width="3" height="11" rx="1" opacity="0.3"/>
+    </svg>
+    <!-- Wifi -->
+    <svg width="15" height="11" viewBox="0 0 16 12" fill="black">
+      <path d="M8 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>
+      <path d="M4.05 7.05a5.5 5.5 0 017.9 0l1.4-1.4a7.5 7.5 0 00-10.7 0l1.4 1.4z"/>
+      <path d="M1.2 4.2a9.5 9.5 0 0113.6 0l1.4-1.4A11.5 11.5 0 00-.2 2.8l1.4 1.4z"/>
+    </svg>
+    <!-- Battery -->
+    <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+      <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="black" stroke-opacity="0.35"/>
+      <rect x="2" y="2" width="17" height="8" rx="2" fill="black"/>
+      <path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="black" opacity="0.4"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Nav Bar -->
+<div class="nav-bar">
+  <div class="nav-back">
+    <svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8.5 1L1 8.5l7.5 7.5"/>
+    </svg>
+    <span style="font-size:17px">Messages</span>
+  </div>
+  <div class="nav-contact">
+    <div class="nav-avatar">W</div>
+    <div class="nav-name">Workbook</div>
+  </div>
+  <div class="nav-right">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12.5"/>
+      <circle cx="12" cy="16" r="0.8" fill="#007AFF"/>
+    </svg>
+  </div>
+</div>
+
+<div class="fidelity-badge"><b>Cardboard</b> prototype — simulated flow, no real backend</div>
+
+<div class="messages" id="messages"></div>
+<div class="quick-replies" id="quickReplies"></div>
+
+<div class="input-bar">
+  <div class="input-wrap">
+    <textarea class="input-field" id="inputField" placeholder="iMessage" rows="1"></textarea>
+  </div>
+  <button class="send-btn" id="sendBtn" disabled>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 12V2M2 7l5-5 5 5"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+const messagesEl = document.getElementById('messages');
+const qrEl = document.getElementById('quickReplies');
+const inputEl = document.getElementById('inputField');
+const sendBtnEl = document.getElementById('sendBtn');
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let state = 'start';
+let user = { name: '', trade: '' };
+let jobs = [];
+let pendingJob = null;
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function now() {
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function scrollDown() {
+  requestAnimationFrame(() => messagesEl.scrollTop = messagesEl.scrollHeight);
+}
+
+function setQuickReplies(options) {
+  qrEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleSend(opt);
+    qrEl.appendChild(btn);
+  });
+}
+
+function clearQR() { qrEl.innerHTML = ''; }
+
+// ── Message rendering ─────────────────────────────────────────────────────────
+function addTimeLabel(text) {
+  const el = document.createElement('div');
+  el.className = 'time-label';
+  el.textContent = text;
+  messagesEl.appendChild(el);
+}
+
+function addMessage(text, dir, template) {
+  const row = document.createElement('div');
+  row.className = `msg-row ${dir}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${dir}`;
+  bubble.textContent = text;
+
+  if (template) {
+    const block = document.createElement('div');
+    block.className = 'template-block';
+    block.textContent = template;
+    bubble.appendChild(block);
+  }
+
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+
+  if (dir === 'out') {
+    const d = document.createElement('div');
+    d.className = 'delivered';
+    d.textContent = 'Delivered';
+    messagesEl.appendChild(d);
+  }
+
+  scrollDown();
+}
+
+function showTyping() {
+  const row = document.createElement('div');
+  row.className = 'typing-row';
+  row.id = 'typing';
+  row.innerHTML = `<div class="typing-bubble"><span></span><span></span><span></span></div>`;
+  messagesEl.appendChild(row);
+  scrollDown();
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+function botSays(text, template, quickReplies, delay) {
+  return new Promise(resolve => {
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      addMessage(text, 'in', template || null);
+      if (quickReplies) setQuickReplies(quickReplies);
+      resolve();
+    }, delay ?? (700 + Math.random() * 500));
+  });
+}
+
+// ── Parsing helpers ───────────────────────────────────────────────────────────
+function extractPrice(text) {
+  const m = text.match(/\$?(\d+(?:,\d{3})?)/);
+  return m ? m[1].replace(',', '') : null;
+}
+
+function extractClient(text) {
+  const m = text.match(/\bfor\s+([A-Z][a-z]+)/);
+  if (m) return m[1];
+  const m2 = text.match(/\bwith\s+([A-Z][a-z]+)/i);
+  if (m2) return m2[1];
+  return null;
+}
+
+function extractDate(text) {
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const words = ['tomorrow','today','next week'];
+  for (const d of [...days, ...words]) {
+    if (text.toLowerCase().includes(d)) return d.charAt(0).toUpperCase() + d.slice(1);
+  }
+  const dateMatch = text.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{1,2}/i);
+  return dateMatch ? dateMatch[0] : 'the agreed date';
+}
+
+function extractDays(text) {
+  const m = text.match(/(\d+)\s*days?/i);
+  return m ? parseInt(m[1]) : null;
+}
+
+function extractEmployer(text) {
+  // "worked 4 days for Ramos" / "Ramos paid"
+  const forMatch = text.match(/\bfor\s+([A-Z][a-z]+)/);
+  if (forMatch) return forMatch[1];
+  const firstWord = text.trim().match(/^([A-Z][a-z]+)/);
+  if (firstWord && ['paid','owes','sent'].some(w => text.toLowerCase().includes(w))) return firstWord[1];
+  return null;
+}
+
+function findJob(identifier) {
+  if (!identifier) return jobs[jobs.length - 1];
+  const id = identifier.toLowerCase();
+  return jobs.find(j =>
+    (j.client && j.client.toLowerCase().includes(id)) ||
+    (j.description && j.description.toLowerCase().includes(id))
+  ) || jobs[jobs.length - 1];
+}
+
+function outstandingJobs() {
+  return jobs.filter(j => j.status === 'active' || j.status === 'invoiced');
+}
+
+function formatOutstanding() {
+  const list = outstandingJobs();
+  if (list.length === 0) return null;
+  return list.map((j, i) => {
+    const amount = j.type === 'project' ? `$${j.price}` : `$${j.rate}/day`;
+    const label = j.type === 'project' ? j.description : `${j.description} @ ${amount}`;
+    const statusLabel = j.status === 'invoiced' ? ' — invoiced' : '';
+    return `${i + 1}. ${j.client}: ${label}${statusLabel}`;
+  }).join('\n');
+}
+
+// ── Conversation engine ───────────────────────────────────────────────────────
+async function handleSend(raw) {
+  const text = raw.trim();
+  if (!text) return;
+
+  clearQR();
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  sendBtnEl.disabled = true;
+
+  addMessage(text, 'out');
+  const lower = text.toLowerCase();
+
+  // ── ENROLLMENT ──────────────────────────────────────────────────────────────
+  if (state === 'start') {
+    await botSays(
+      `Hey — you've reached Workbook.\n\nI help tradespeople lock in job agreements and send invoices by text. No app, no sign-up.\n\nWhat's your name and trade? (eg. "Marco, tile" or "Luis, framing")`
+    );
+    state = 'ask_name';
+    return;
+  }
+
+  if (state === 'ask_name') {
+    const parts = text.split(/,\s*/);
+    user.name = parts[0].trim();
+    user.trade = parts[1] ? parts[1].trim() : 'trades';
+    addTimeLabel(now());
+    await botSays(
+      `Got it, ${user.name}. You're set up.\n\nText me to start a new job, agree on a day rate with a crew, check what you're owed, or send an invoice.`,
+      null,
+      ['New job', 'New crew', 'Outstanding']
+    );
+    state = 'idle';
+    return;
+  }
+
+  // ── OUTSTANDING ──────────────────────────────────────────────────────────────
+  if (lower.includes('outstanding') || lower.includes('owed') || lower.includes('unpaid') || lower.includes('what do i have')) {
+    const list = outstandingJobs();
+    if (list.length === 0) {
+      await botSays(`You're all clear, ${user.name}. No outstanding jobs.`, null, ['New job', 'New crew']);
+    } else {
+      const summary = formatOutstanding();
+      await botSays(`Here's what's outstanding:`, summary, ['New job', 'New crew']);
+    }
+    state = 'idle';
+    return;
+  }
+
+  // ── PROJECT JOB ──────────────────────────────────────────────────────────────
+  if (state === 'idle' && (lower.includes('new job') || lower.includes('new project') || lower.includes('project'))) {
+    await botSays(
+      `What's the job? Just describe it — client name, what you're doing, your price, and when you start.\n\n(eg. "Tile Sarah's bathroom for $950, starting Thursday")`
+    );
+    state = 'project_details';
+    return;
+  }
+
+  if (state === 'project_details' || (state === 'idle' && (extractClient(text) || extractPrice(text)) && !lower.includes('day') && !lower.includes('crew') && !lower.includes('starting with'))) {
+    const client = extractClient(text) || 'your client';
+    const price = extractPrice(text) || '?';
+    const date = extractDate(text);
+    const desc = text.replace(/\$\d+/g, '').replace(/for\s+\w+/i, '').replace(/starting\s+\S+/i, '').replace(/,/g, '').trim() || `${user.trade} work`;
+
+    pendingJob = { type: 'project', client, description: desc, price, startDate: date, status: 'active' };
+    jobs.push(pendingJob);
+
+    const template = `Hi ${client} — confirming our agreement:\n\n${desc} for $${price}, starting ${date}.\n\nReply YES to confirm.`;
+
+    await botSays(
+      `Here's your scope agreement — forward this to ${client}:`,
+      template,
+      ['Job complete', 'Outstanding']
+    );
+    state = 'idle';
+    return;
+  }
+
+  // ── DAY RATE / CREW ──────────────────────────────────────────────────────────
+  if (state === 'idle' && (lower.includes('new crew') || lower.includes('starting with') || lower.includes('crew') || lower.includes('/day') || lower.includes('a day') || lower.includes('per day'))) {
+    if (lower === 'new crew') {
+      await botSays(
+        `Who are you working for and what's your rate?\n\n(eg. "Starting with Ramos framing Monday, $185/day")`
+      );
+      state = 'rate_details';
+      return;
+    }
+    // Inline details provided
+    const client = extractClient(text) || extractEmployer(text) || 'your employer';
+    const rate = extractPrice(text) || '?';
+    const date = extractDate(text);
+    const tradeDesc = lower.includes('framing') ? 'framing' : lower.includes('demo') ? 'demo' : lower.includes('concrete') ? 'concrete' : user.trade;
+
+    pendingJob = { type: 'dayrate', client, description: tradeDesc, rate, status: 'active' };
+    jobs.push(pendingJob);
+
+    const template = `Hi ${client} — confirming our agreement:\n\n${tradeDesc} work at $${rate}/day, starting ${date}.\n\nReply YES to confirm.`;
+
+    await botSays(
+      `Here's your rate agreement — forward this to ${client}:`,
+      template,
+      ['Log days worked', 'Outstanding']
+    );
+    state = 'idle';
+    return;
+  }
+
+  if (state === 'rate_details') {
+    const client = extractClient(text) || extractEmployer(text) || 'your employer';
+    const rate = extractPrice(text) || '?';
+    const date = extractDate(text);
+    const tradeDesc = user.trade;
+
+    pendingJob = { type: 'dayrate', client, description: tradeDesc, rate, status: 'active' };
+    jobs.push(pendingJob);
+
+    const template = `Hi ${client} — confirming our agreement:\n\n${tradeDesc} work at $${rate}/day, starting ${date}.\n\nReply YES to confirm.`;
+
+    await botSays(
+      `Here's your rate agreement — forward this to ${client}:`,
+      template,
+      ['Log days worked', 'Outstanding']
+    );
+    state = 'idle';
+    return;
+  }
+
+  // ── LOG DAYS WORKED ──────────────────────────────────────────────────────────
+  if (lower.includes('log days') || lower.includes('worked') || lower.includes('days for')) {
+    const days = extractDays(text);
+    const employer = extractEmployer(text);
+    const job = jobs.filter(j => j.type === 'dayrate' && j.status === 'active').find(j =>
+      employer ? j.client.toLowerCase().includes(employer.toLowerCase()) : true
+    ) || jobs.filter(j => j.type === 'dayrate').slice(-1)[0];
+
+    if (!job) {
+      await botSays(`I don't have an active crew job on record. Text me your rate agreement first.`, null, ['New crew']);
+      state = 'idle';
+      return;
+    }
+
+    if (!days) {
+      await botSays(`How many days did you work for ${job.client}?`);
+      state = 'log_days_waiting';
+      pendingJob = job;
+      return;
+    }
+
+    job.days = days;
+    job.status = 'invoiced';
+    const total = parseInt(job.rate) * days;
+    const template = `Hi ${job.client} — worked ${days} days @ $${job.rate}/day.\n\nInvoice: $${total}\n\nPlease let me know when you've sent payment.`;
+
+    await botSays(
+      `Here's your tally — forward this to ${job.client}:`,
+      template,
+      [`${job.client} paid`, 'Outstanding']
+    );
+    state = 'idle';
+    return;
+  }
+
+  if (state === 'log_days_waiting') {
+    const days = extractDays(text) || parseInt(text);
+    if (pendingJob && days) {
+      pendingJob.days = days;
+      pendingJob.status = 'invoiced';
+      const total = parseInt(pendingJob.rate) * days;
+      const template = `Hi ${pendingJob.client} — worked ${days} days @ $${pendingJob.rate}/day.\n\nInvoice: $${total}\n\nPlease let me know when you've sent payment.`;
+
+      await botSays(
+        `Here's your tally — forward this to ${pendingJob.client}:`,
+        template,
+        [`${pendingJob.client} paid`, 'Outstanding']
+      );
+    }
+    state = 'idle';
+    return;
+  }
+
+  // ── JOB COMPLETE / INVOICE ────────────────────────────────────────────────────
+  if (lower.includes('done') || lower.includes('finished') || lower.includes('complete') || lower.includes('job complete')) {
+    const projectJobs = jobs.filter(j => j.type === 'project' && j.status === 'active');
+    const job = projectJobs[projectJobs.length - 1];
+
+    if (!job) {
+      await botSays(`I don't see an active project job. Start one first.`, null, ['New job']);
+      state = 'idle';
+      return;
+    }
+
+    job.status = 'invoiced';
+    const template = `Hi ${job.client} — the ${job.description} is finished.\n\nInvoice: $${job.price}\n\nPlease let me know when you've sent payment.`;
+
+    await botSays(
+      `Here's your invoice — forward this to ${job.client}:`,
+      template,
+      [`${job.client} paid`, 'Outstanding']
+    );
+    state = 'idle';
+    return;
+  }
+
+  // ── PAYMENT RECEIVED ─────────────────────────────────────────────────────────
+  if (lower.includes('paid') || lower.includes('got paid') || lower.includes('received payment')) {
+    const clientName = extractEmployer(text) || extractClient(text);
+    const job = findJob(clientName);
+
+    if (job) {
+      job.status = 'paid';
+      const amount = job.type === 'project' ? `$${job.price}` : `$${parseInt(job.rate) * (job.days || 1)}`;
+      const remaining = outstandingJobs();
+      const followUp = remaining.length > 0
+        ? `You still have ${remaining.length} outstanding job${remaining.length > 1 ? 's' : ''}.`
+        : `You're all clear.`;
+
+      await botSays(
+        `${job.client}'s ${job.description} marked as paid — ${amount}.\n\n${followUp}`,
+        null,
+        remaining.length > 0 ? ['Outstanding', 'New job'] : ['New job', 'New crew']
+      );
+    } else {
+      await botSays(`Which job got paid? I'll mark it off.`);
+    }
+    state = 'idle';
+    return;
+  }
+
+  // ── FALLBACK ──────────────────────────────────────────────────────────────────
+  await botSays(
+    `I can help you with:\n\n— New job (project + price)\n— New crew (day rate)\n— Log days worked\n— Send an invoice\n— Check outstanding`,
+    null,
+    ['New job', 'New crew', 'Outstanding']
+  );
+  state = 'idle';
+}
+
+// ── Input handling ────────────────────────────────────────────────────────────
+inputEl.addEventListener('input', () => {
+  sendBtnEl.disabled = inputEl.value.trim().length === 0;
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 88) + 'px';
+});
+
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (inputEl.value.trim()) handleSend(inputEl.value);
+  }
+});
+
+sendBtnEl.addEventListener('click', () => {
+  if (inputEl.value.trim()) handleSend(inputEl.value);
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+addTimeLabel('Today ' + now());
+setQuickReplies(['Hi', 'Hey', 'Hello']);
+
+// Live clock
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
