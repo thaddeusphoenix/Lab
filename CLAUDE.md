@@ -11,6 +11,7 @@ When working in this repo, consult the relevant persona files to inform your thi
 | Persona | File | When to consult |
 |---|---|---|
 | Product Manager | `team/product-manager.md` | Defining what to build, why it matters, and how to prioritize |
+| Product Owner | `team/product-owner.md` | Daily team check-ins, backlog health, PM summary reports, and unblocking delivery |
 | Product Designer | `team/product-designer.md` | Designing interactions, interfaces, and user experiences |
 | Tech Lead | `team/tech-lead.md` | Making architecture decisions, assessing feasibility, choosing technologies |
 | User Researcher | `team/user-researcher.md` | Understanding users, validating assumptions, interpreting research |
