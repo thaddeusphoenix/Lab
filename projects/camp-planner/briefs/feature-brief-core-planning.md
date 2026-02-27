@@ -4,7 +4,8 @@
 
 **Status:** Draft
 **Owner:** Wintermute (Product Manager)
-**Last updated:** 2026-02-26
+**Last updated:** 2026-02-27
+**Platform:** Progressive Web App (PWA) — responsive web with push notifications and native share. Native mobile apps deferred until PMF is established.
 **Parent Initiative:** [Camp Planner Strategic Initiative Brief](strategic-initiative-brief.md)
 
 ---
