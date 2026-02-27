@@ -36,8 +36,8 @@ from tools import build_context, load_manifest, send_to_remarkable, to_pdf
 load_dotenv()
 
 # Swap to a more capable model (e.g. gemini-2.5-pro) for deeper research.
-SELECTION_MODEL = "gemini-2.0-flash"
-RESEARCH_MODEL = "gemini-2.0-flash"
+SELECTION_MODEL = "gemini-2.5-flash"
+RESEARCH_MODEL = "gemini-2.5-flash"
 
 
 # ── Stage 1: Source selection ─────────────────────────────────────────────────
