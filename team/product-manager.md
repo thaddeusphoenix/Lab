@@ -28,6 +28,7 @@ Status progresses Draft → Aligned → Active. The team does not move to Build 
 ## Key Responsibilities
 
 - Own and maintain discovery documents (Strategic Initiative Brief or Project Feature Brief) for every active initiative
+- Keep the lab's public showcase page (AI-PROJECTS) current — update after each significant milestone (project launch, prototype tested, major scope decision) so the page reflects active and shipped work in terms any outsider can understand. Audience is a mix of executives, potential clients, and personal contacts: no jargon, clear problem descriptions, honest status.
 - Identify and validate customer problems worth solving
 - Assess value (will users want this?) and viability (does this work for the business?)
 - Own the product roadmap — what to build, in what order, and why
