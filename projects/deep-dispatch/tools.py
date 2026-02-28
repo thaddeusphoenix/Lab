@@ -16,7 +16,10 @@ import re
 import subprocess
 from pathlib import Path
 
-from fpdf import FPDF
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 SOURCES_DIR = Path(__file__).parent / "sources"
 REPORTS_DIR = Path(__file__).parent / "reports"
@@ -87,69 +90,64 @@ def _classify_line(line: str) -> tuple[str, str]:
 
 
 def to_pdf(markdown_content: str, question: str) -> Path:
-    """Convert a markdown report to a clean PDF for reMarkable (pure Python, no system deps)."""
+    """Convert a markdown report to a clean PDF for reMarkable (ReportLab, proper text flow)."""
     REPORTS_DIR.mkdir(exist_ok=True)
     pdf_path = REPORTS_DIR / f"{_slugify(question)}.pdf"
 
-    # Strip markdown links to plain text: [text](url) → text
+    # Strip markdown links: [text](url) → text (URLs not clickable on reMarkable)
     text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", markdown_content)
-    # Strip bold/italic markers
+    # Strip bold/italic/code markers
     text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     text = re.sub(r"\*(.+?)\*", r"\1", text)
     text = re.sub(r"`(.+?)`", r"\1", text)
-    # Normalize Unicode to latin-1 safe characters
-    text = (text
-        .replace("\u2022", "-").replace("\u2023", "-").replace("\u25e6", "-")
-        .replace("\u2018", "'").replace("\u2019", "'")
-        .replace("\u201c", '"').replace("\u201d", '"')
-        .replace("\u2014", "--").replace("\u2013", "-")
-        .replace("\u2026", "...").replace("\u00b7", "-")
-    )
-    text = text.encode("latin-1", errors="replace").decode("latin-1")
-    # Remove trailing whitespace and collapse runs of 3+ blank lines to 2
+    # Truncate bare URLs that would overflow — not usable on e-ink anyway
+    text = re.sub(r"https?://\S{50,}", lambda m: m.group(0)[:50] + "...", text)
+    # Collapse runs of 3+ blank lines
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
 
-    pdf = FPDF()
-    pdf.set_margins(20, 20, 20)
-    pdf.add_page()
+    def esc(s: str) -> str:
+        """Escape HTML special characters for ReportLab Paragraph."""
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    W = pdf.epw  # effective page width (respects margins)
-    consecutive_blanks = 0
+    # Paragraph styles
+    h1 = ParagraphStyle("h1", fontName="Helvetica-Bold",   fontSize=18, leading=22, spaceBefore=14, spaceAfter=6)
+    h2 = ParagraphStyle("h2", fontName="Helvetica-Bold",   fontSize=14, leading=18, spaceBefore=12, spaceAfter=4)
+    h3 = ParagraphStyle("h3", fontName="Helvetica-BoldOblique", fontSize=12, leading=16, spaceBefore=8, spaceAfter=3)
+    body = ParagraphStyle("body", fontName="Helvetica",    fontSize=11, leading=15, spaceAfter=4)
+    li   = ParagraphStyle("li",   fontName="Helvetica",    fontSize=11, leading=14, spaceAfter=3, leftIndent=18)
+    quot = ParagraphStyle("quot", fontName="Helvetica-Oblique", fontSize=11, leading=14, spaceAfter=3, leftIndent=30)
 
+    story = []
     for raw_line in text.split("\n"):
         kind, line = _classify_line(raw_line)
         line = line.strip()
         if not line and kind != "blank":
             continue
 
-        consecutive_blanks = 0
-        if kind == "h1":
-            pdf.set_font("Helvetica", "B", 18)
-            pdf.ln(4)
-            pdf.multi_cell(W, 10, line)
-            pdf.ln(2)
+        if kind == "blank":
+            story.append(Spacer(1, 8))
+        elif kind == "h1":
+            story.append(Paragraph(esc(line), h1))
         elif kind == "h2":
-            pdf.set_font("Helvetica", "B", 14)
-            pdf.ln(6)
-            pdf.multi_cell(W, 8, line)
-            pdf.ln(1)
+            story.append(Paragraph(esc(line), h2))
         elif kind == "h3":
-            pdf.set_font("Helvetica", "BI", 12)
-            pdf.ln(4)
-            pdf.multi_cell(W, 7, line)
-        elif kind in ("li", "quote"):
-            pdf.set_font("Helvetica", "I" if kind == "quote" else "", 11)
-            pdf.multi_cell(W, 6, line)
-        elif kind == "blank":
-            consecutive_blanks += 1
-            if consecutive_blanks <= 1:
-                pdf.ln(3)
-            continue
+            story.append(Paragraph(esc(line), h3))
+        elif kind == "li":
+            story.append(Paragraph(esc(line), li))
+        elif kind == "quote":
+            story.append(Paragraph(esc(line), quot))
         else:
-            pdf.set_font("Helvetica", "", 11)
-            pdf.multi_cell(W, 6, line)
+            story.append(Paragraph(esc(line), body))
 
-    pdf.output(str(pdf_path))
+    doc = SimpleDocTemplate(
+        str(pdf_path),
+        pagesize=letter,
+        leftMargin=inch,
+        rightMargin=inch,
+        topMargin=inch,
+        bottomMargin=inch,
+    )
+    doc.build(story)
     print(f"  PDF: {pdf_path.name}")
     return pdf_path
 
