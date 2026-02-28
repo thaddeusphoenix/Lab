@@ -106,12 +106,15 @@ def to_pdf(markdown_content: str, question: str) -> Path:
         .replace("\u2026", "...").replace("\u00b7", "-")
     )
     text = text.encode("latin-1", errors="replace").decode("latin-1")
+    # Remove trailing whitespace and collapse runs of 3+ blank lines to 2
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
 
     pdf = FPDF()
     pdf.set_margins(20, 20, 20)
     pdf.add_page()
 
     W = pdf.epw  # effective page width (respects margins)
+    consecutive_blanks = 0
 
     for raw_line in text.split("\n"):
         kind, line = _classify_line(raw_line)
@@ -119,6 +122,7 @@ def to_pdf(markdown_content: str, question: str) -> Path:
         if not line and kind != "blank":
             continue
 
+        consecutive_blanks = 0
         if kind == "h1":
             pdf.set_font("Helvetica", "B", 18)
             pdf.ln(4)
@@ -137,7 +141,10 @@ def to_pdf(markdown_content: str, question: str) -> Path:
             pdf.set_font("Helvetica", "I" if kind == "quote" else "", 11)
             pdf.multi_cell(W, 6, line)
         elif kind == "blank":
-            pdf.ln(3)
+            consecutive_blanks += 1
+            if consecutive_blanks <= 1:
+                pdf.ln(3)
+            continue
         else:
             pdf.set_font("Helvetica", "", 11)
             pdf.multi_cell(W, 6, line)
@@ -154,8 +161,18 @@ RMAPI = Path.home() / ".local" / "bin" / "rmapi"
 
 def send_to_remarkable(pdf_path: Path, subject: str) -> None:
     """Push the PDF to reMarkable using rmapi."""
-    subprocess.run(
+    # --content-only overwrites an existing document on the device
+    # without recreating it (preserves annotations if any)
+    result = subprocess.run(
         [str(RMAPI), "put", str(pdf_path)],
-        check=True,
+        capture_output=True, text=True,
     )
+    if result.returncode != 0:
+        if "already exists" in result.stderr:
+            subprocess.run(
+                [str(RMAPI), "put", "--content-only", str(pdf_path)],
+                check=True,
+            )
+        else:
+            raise subprocess.CalledProcessError(result.returncode, result.args)
     print(f"  Delivered: {pdf_path.name}")

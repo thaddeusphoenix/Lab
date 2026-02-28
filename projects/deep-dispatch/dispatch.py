@@ -166,6 +166,26 @@ def run(question: str) -> None:
     report = deep_research(client, question, source_context)
     print("      Done")
 
+    # Stage 2.5: Eval — score the report before delivery
+    print("\n[eval] Scoring report...")
+    from eval import evaluate
+    result = evaluate(question, report)
+    print(result.display())
+
+    if result.score < 3.0:
+        print(f"\n  ⚠  Score is low ({result.score:.1f}/5).")
+        answer = input("  Deliver anyway? [y/N] ").strip().lower()
+        if answer != "y":
+            # Save the report locally so it's not lost
+            REPORTS_DIR = Path(__file__).parent / "reports"
+            REPORTS_DIR.mkdir(exist_ok=True)
+            from tools import _slugify
+            md_path = REPORTS_DIR / f"{_slugify(question)}.md"
+            md_path.write_text(report, encoding="utf-8")
+            print(f"  Report saved locally: {md_path.name}")
+            print("  Delivery skipped.")
+            return
+
     # Stage 3: Deliver
     print("\n[3/3] Delivering to reMarkable...")
     pdf_path = to_pdf(report, question)
