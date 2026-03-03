@@ -313,12 +313,20 @@ function multiStop(stops, t) {
 }
 
 function blendToRgb(colors) {
-  const rgbs = colors.map(c => hslToRgb(c.h, c.s, c.l));
-  return {
-    r: Math.round(rgbs.reduce((s, c) => s + c[0], 0) / rgbs.length),
-    g: Math.round(rgbs.reduce((s, c) => s + c[1], 0) / rgbs.length),
-    b: Math.round(rgbs.reduce((s, c) => s + c[2], 0) / rgbs.length),
-  };
+  // Blend in HSL space: circular mean for hue, arithmetic mean for S and L.
+  // RGB averaging collapses complementary hues toward gray — HSL preserves vividness.
+  let sinSum = 0, cosSum = 0, sSum = 0, lSum = 0;
+  for (const c of colors) {
+    const rad = c.h * Math.PI / 180;
+    sinSum += Math.sin(rad);
+    cosSum += Math.cos(rad);
+    sSum += c.s;
+    lSum += c.l;
+  }
+  const n = colors.length;
+  const h = (Math.atan2(sinSum / n, cosSum / n) * 180 / Math.PI + 360) % 360;
+  const [r, g, b] = hslToRgb(h, sSum / n, lSum / n);
+  return { r, g, b };
 }
 
 function lerpRgb(a, b, t) {
@@ -388,18 +396,17 @@ function computeColor(age) {
 function traditionalReading(rgb) {
   const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
 
-  if (l < 16)  return "The ring reads dark — stillness, or the weight of strain.";
-  if (s < 18)  return "The ring reads pale — between states, open, uncertain.";
-
-  if      (h >= 20  && h < 60)  return "The ring reads amber — creative, alive, a little scattered.";
-  else if (h >= 60  && h < 110) return "The ring reads gold — active, seeking, restless.";
-  else if (h >= 110 && h < 160) return "The ring reads green — balanced, no strain, at rest.";
-  else if (h >= 160 && h < 200) return "The ring reads teal — focused, content, peaceful.";
-  else if (h >= 200 && h < 230) return "The ring reads blue — happy, open, emotions flowing.";
-  else if (h >= 230 && h < 265) return "The ring reads deep blue — serene, romantic, bliss.";
-  else if (h >= 265 && h < 320) return "The ring reads violet — passionate, purposeful, clear.";
-
-  return "The ring reads deep — something is moving beneath the surface.";
+  if (l < 16)          return "The ring reads dark — stillness, or the weight of strain.";
+  if (s < 18)          return "The ring reads pale — between states, open, uncertain.";
+  if (h < 20 || h >= 320) return "The ring reads red — a turning point, charged, unresolved.";
+  if (h < 55 && l < 38)  return "The ring reads brown — strained, unsettled, something held too tight.";
+  if (h < 60)          return "The ring reads amber — creative, alive, a little scattered.";
+  if (h < 110)         return "The ring reads gold — active, seeking, restless.";
+  if (h < 160)         return "The ring reads green — balanced, no strain, at rest.";
+  if (h < 200)         return "The ring reads teal — focused, content, peaceful.";
+  if (h < 230)         return "The ring reads blue — happy, open, emotions flowing.";
+  if (h < 265)         return "The ring reads deep blue — serene, romantic, bliss.";
+  return                      "The ring reads violet — passionate, purposeful, clear.";
 }
 
 // ── Poetry ────────────────────────────────────────────────────────────
