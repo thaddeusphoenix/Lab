@@ -119,6 +119,51 @@ The most common escalation cause: the brief's "Proposed Solution" and the accept
 
 ---
 
+## Execution
+
+The Coordinator script enforces the firewall at the API call level — scenarios are structurally absent from the Writer's API call. It is impossible for the Writer to see the scenarios without modifying the source code.
+
+### Setup
+
+```bash
+pip3 install -r skills/ai-build-loop/requirements.txt
+export ANTHROPIC_API_KEY=your_key_here
+```
+
+### Run
+
+```bash
+python3 skills/ai-build-loop/coordinator.py \
+  --brief   projects/<name>/briefs/<feature>.md \
+  --scenarios projects/<name>/briefs/<feature>-scenarios.md
+```
+
+With an explicit output directory:
+
+```bash
+python3 skills/ai-build-loop/coordinator.py \
+  --brief   projects/<name>/briefs/<feature>.md \
+  --scenarios projects/<name>/briefs/<feature>-scenarios.md \
+  --output-dir projects/<name>/build/
+```
+
+### Exit codes
+
+| Code | Meaning | Artifacts produced |
+|---|---|---|
+| `0` | PASS | `<feature>.html`, audit log, amendment log |
+| `1` | Input or firewall error | Error to stdout — nothing saved |
+| `2` | Escalated — max runs reached | `<feature>-escalation.md`, audit log |
+
+### Output files (all in `--output-dir`)
+
+- `<feature>.html` — the passing artifact _(exit 0 only)_
+- `output-run-N.html` — artifact from each individual run
+- `<feature>-amended-run-N.md` — brief state after each amendment
+- `<feature>-audit-<timestamp>.json` — full run log with per-scenario verdicts
+- `<feature>-amendment-log.md` — human-readable summary of amendments _(if any)_
+- `<feature>-escalation.md` — escalation report for PM review _(exit 2 only)_
+
 ## Checklist
 
 - [ ] Both documents exist and are complete before loop starts
