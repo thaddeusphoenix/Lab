@@ -47,6 +47,18 @@ Fill in the template top-to-bottom. Every section matters:
 - If a Strategic Initiative Brief, link to child Feature Briefs as they are written
 - Update the project's `README.md` to reference the brief
 
+### 6. Scenarios — Create the Tester's rubric
+
+Once the brief reaches `Aligned` status, create the companion acceptance scenarios document:
+
+- Use `templates/acceptance-scenarios.md`
+- Save as `[feature-name]-scenarios.md` in the same `briefs/` directory
+- Write at least one Tier 1 (automatable) and one Tier 2 (judgment) scenario
+- Every scenario must have a Pass signal before the brief is considered loop-ready
+
+**The brief is not ready to trigger a build loop without a complete scenarios document.**
+The scenarios are written by the same person who wrote the brief — they are the human's specification of what done looks like, translated into a form the Tester can evaluate.
+
 ## Checklist
 
 - [ ] Correct template used for scope (initiative vs feature)
@@ -56,3 +68,6 @@ Fill in the template top-to-bottom. Every section matters:
 - [ ] At least one "Biggest Unknown" that would invalidate the direction
 - [ ] Status set to `Draft`
 - [ ] README updated with link to brief
+- [ ] Acceptance scenarios document created at `[feature-name]-scenarios.md`
+- [ ] At least one Tier 1 and one Tier 2 scenario defined with Pass signals
+- [ ] Scenarios document is a separate file — never merged into the brief

@@ -109,6 +109,7 @@ A skill is not a checklist — it is a pipeline with distinct stages. Every skil
 | Write a Brief | `skills/write-a-brief/SKILL.md` | Starting a project or feature and need to capture problem + direction before building |
 | Run Discovery | `skills/run-discovery/SKILL.md` | Opening a new project or moving through the Discover phase |
 | Create a Prototype | `skills/create-prototype/SKILL.md` | A decision is uncertain or an assumption needs to be tested before building |
+| AI Build Loop | `skills/ai-build-loop/SKILL.md` | Brief is Aligned and scenarios are complete — ready to execute the automated build, test, and iteration loop |
 
 ### Skill File Format
 
@@ -124,6 +125,48 @@ description: Use when [trigger condition]. [One sentence on what it produces.]
 The description must be trigger-oriented — it tells the reader *when* to reach for the skill, not just *what* it is. Content follows: Quick Start → Workflow (Gather → Explore → Discuss → Plan → Document) → Checklist. Keep it under 100 lines.
 
 When a decision feels uncertain or a debate is going in circles, look for a skill before writing more prose.
+
+## AI Build Loop
+
+The AI Build Loop is the lab's standard delivery mechanism for all feature builds. Every build in this lab — no exceptions — runs through this loop. See `skills/ai-build-loop/SKILL.md` for the full execution protocol.
+
+### The Loop
+
+```
+[Human: write brief + acceptance scenarios]
+        ↓
+[Writer: reads brief only → produces output]
+        ↓
+[Tester: reads brief + scenarios + output → PASS or FAIL + amendment]
+        ↓
+   PASS → human reviews → ships
+   FAIL → Coordinator appends amendment to brief → loop (max 5 runs)
+```
+
+### The Three Actors
+
+| Actor | Receives | Produces | Context rule |
+|---|---|---|---|
+| **Writer** | `brief.md` only | output artifact | Never sees `scenarios.md` |
+| **Tester** | `brief.md` + `scenarios.md` + output | Structured JSON: PASS/FAIL + `spec_amendment` | Never sees source code — output only |
+| **Coordinator** | All artifacts | Orchestrates loop, applies amendments | Never collapses Writer/Tester context |
+
+### ⚠ The Firewall
+
+The acceptance scenarios document is the Tester's rubric. It must never be passed to the Writer. This separation is enforced at the file level — brief and scenarios are always two separate files. If the Writer sees the scenarios, it will optimize for passing the test rather than solving the problem. Violation of this rule invalidates the run.
+
+### File Structure
+
+Every feature that enters the build loop has two documents in `briefs/`:
+- `[feature-name].md` — the brief. Writer input. Human-readable alignment doc.
+- `[feature-name]-scenarios.md` — acceptance scenarios. Tester input only.
+
+### Loop Rules
+
+- Maximum **5 iterations**. After 5 failed runs, escalate to human — the spec has a structural problem.
+- Each FAIL produces a structured `spec_amendment` that is appended to the brief before the next run.
+- The amendment log is the delivery record: what the spec got wrong and how it was corrected across runs.
+- The loop does not ship. The human reviews the passing output before anything deploys.
 
 ## Repo Conventions
 

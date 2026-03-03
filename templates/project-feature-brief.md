@@ -43,3 +43,11 @@ _The open questions that discovery needs to answer before we commit to build._
 
 1.
 2.
+
+## Acceptance Scenarios
+
+_Defined in a separate document — create `[feature-name]-scenarios.md` in the same `briefs/` directory using `templates/acceptance-scenarios.md`._
+
+**⚠ Firewall rule:** The brief is the Writer's input. The acceptance scenarios are the Tester's rubric. These must live in separate files. The Writer never receives the scenarios document. The Tester receives both. This separation is non-negotiable — if the Writer sees the scenarios, it optimizes for passing the test rather than solving the problem.
+
+The brief is not ready to trigger a build loop until its companion scenarios document exists and is complete.
