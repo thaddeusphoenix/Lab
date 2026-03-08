@@ -9,13 +9,12 @@
 
     :root {
       --bg: #0f0f0f;
-      --surface: #1a1a1a;
+      --surface: #161616;
       --accent: #e8c87a;
       --red: #e87a7a;
       --green: #7ae8a0;
       --text: #f0f0f0;
-      --muted: #888;
-      --border: #2a2a2a;
+      --muted: #666;
     }
 
     html, body {
@@ -32,161 +31,120 @@
       display: none;
       position: absolute;
       inset: 0;
-      padding: 72px 100px;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
+      text-align: center;
+      flex-direction: column;
+      gap: 24px;
+      padding: 80px;
     }
     .slide.active { display: flex; }
 
-    /* ── Title ── */
-    .slide.title { align-items: center; text-align: center; }
-    .slide.title .eyebrow {
-      font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 20px;
+    /* ── Eyebrow ── */
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
-    .slide.title h1 {
-      font-size: clamp(38px, 5vw, 68px); font-weight: 700;
-      line-height: 1.1; margin-bottom: 20px;
-    }
-    .slide.title .subtitle {
-      font-size: 17px; color: var(--muted); max-width: 580px; line-height: 1.65;
-    }
-    .slide.title .meta {
-      margin-top: 44px; font-size: 12px; color: #333;
-      letter-spacing: 0.1em; text-transform: uppercase;
+    .eyebrow.accent { color: var(--accent); }
+    .eyebrow.red { color: var(--red); }
+    .eyebrow.green { color: var(--green); }
+
+    /* ── Headline ── */
+    h1 {
+      font-size: clamp(42px, 6vw, 88px);
+      font-weight: 700;
+      line-height: 1.05;
+      max-width: 900px;
     }
 
-    /* ── Chapter divider ── */
-    .slide.chapter {
-      border-left: 4px solid var(--accent);
+    h2 {
+      font-size: clamp(32px, 4.5vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      max-width: 860px;
+    }
+
+    .sub {
+      font-size: clamp(16px, 1.8vw, 22px);
+      color: var(--muted);
+      max-width: 640px;
+      line-height: 1.6;
+    }
+
+    /* ── Accent colors ── */
+    .accent { color: var(--accent); }
+    .red { color: var(--red); }
+    .green { color: var(--green); }
+
+    /* ── Image slot ── */
+    .img-slot {
+      width: 100%;
+      max-width: 780px;
+      height: 340px;
+      border: 1px dashed #2a2a2a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2a2a2a;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       background: var(--surface);
+      overflow: hidden;
     }
-    .slide.chapter.red { border-left-color: var(--red); }
-    .slide.chapter.green { border-left-color: var(--green); }
-
-    .slide.chapter .ch-label {
-      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 16px;
-    }
-    .slide.chapter.red .ch-label { color: var(--red); }
-    .slide.chapter.green .ch-label { color: var(--green); }
-
-    .slide.chapter h2 {
-      font-size: clamp(30px, 4vw, 56px); font-weight: 700;
-      line-height: 1.15; max-width: 820px;
-    }
-    .slide.chapter .ch-note {
-      margin-top: 24px; font-size: 16px; color: var(--muted);
-      max-width: 660px; line-height: 1.65;
+    .img-slot img {
+      width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
     }
 
-    /* ── Content ── */
-    .slide.content h2 {
-      font-size: 24px; font-weight: 600; color: var(--accent); margin-bottom: 32px;
+    /* ── Split layout ── */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      width: 100%;
+      max-width: 1000px;
+      text-align: left;
     }
-    .slide.content.red h2 { color: var(--red); }
-    .slide.content.green h2 { color: var(--green); }
-
-    .slide.content ul {
-      list-style: none; display: flex; flex-direction: column;
-      gap: 20px; max-width: 860px;
+    .split-col { display: flex; flex-direction: column; gap: 16px; }
+    .split-col .s-label {
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
     }
-    .slide.content ul li {
-      font-size: clamp(15px, 1.7vw, 20px); line-height: 1.6;
-      padding-left: 28px; position: relative; color: var(--text);
-    }
-    .slide.content ul li::before {
-      content: "—"; position: absolute; left: 0; color: var(--accent);
-    }
-    .slide.content.red ul li::before { color: var(--red); }
-    .slide.content.green ul li::before { color: var(--green); }
-    .slide.content ul li strong { color: var(--accent); }
-    .slide.content.red ul li strong { color: var(--red); }
-    .slide.content.green ul li strong { color: var(--green); }
-    .slide.content ul li em { color: var(--muted); font-style: normal; }
-
-    /* ── Two col ── */
-    .slide.two-col h2 {
-      font-size: 24px; font-weight: 600; color: var(--accent); margin-bottom: 36px;
-    }
-    .slide.two-col .columns {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start;
-    }
-    .col-label {
-      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 14px;
-    }
-    .col-body { font-size: clamp(14px, 1.55vw, 18px); line-height: 1.7; color: var(--text); }
-
-    /* ── Alert slide ── */
-    .slide.alert {
-      align-items: center; text-align: center;
-      background: #1a0a0a;
-    }
-    .slide.alert .alert-label {
-      font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--red); margin-bottom: 24px;
-    }
-    .slide.alert h2 {
-      font-size: clamp(40px, 6vw, 80px); font-weight: 700;
-      color: var(--red); line-height: 1.1; margin-bottom: 28px;
-    }
-    .slide.alert .alert-body {
-      font-size: clamp(16px, 1.8vw, 22px); color: #c0a0a0;
-      max-width: 720px; line-height: 1.65;
-    }
-    .slide.alert .alert-body strong { color: var(--text); }
-
-    /* ── Pivot ── */
-    .slide.pivot { background: #0a0a1a; }
-    .slide.pivot h2 {
-      font-size: 24px; font-weight: 600; color: var(--red); margin-bottom: 36px;
-    }
-    .slide.pivot .pivot-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
-    }
-    .pivot-col { padding: 28px 32px; border-radius: 8px; }
-    .pivot-col.before { background: #1a0a0a; border: 1px solid #3a1a1a; }
-    .pivot-col.after { background: #0a1a0a; border: 1px solid #1a3a1a; }
-    .pivot-col .p-label {
-      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-    .pivot-col.before .p-label { color: var(--red); }
-    .pivot-col.after .p-label { color: var(--green); }
-    .pivot-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-    .pivot-col ul li {
-      font-size: clamp(14px, 1.5vw, 17px); line-height: 1.55;
-      padding-left: 20px; position: relative; color: var(--text);
-    }
-    .pivot-col.before ul li::before { content: "✕"; position: absolute; left: 0; color: var(--red); font-size: 11px; top: 3px; }
-    .pivot-col.after ul li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-size: 11px; top: 3px; }
-
-    /* ── Metrics ── */
-    .slide.metrics h2 {
-      font-size: 24px; font-weight: 600; color: var(--green); margin-bottom: 44px;
-    }
-    .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
-    .metric { border-top: 2px solid var(--green); padding-top: 20px; }
-    .metric .number {
-      font-size: clamp(32px, 4vw, 52px); font-weight: 700; line-height: 1; margin-bottom: 12px;
-    }
-    .metric .m-label {
-      font-size: 12px; color: var(--muted); line-height: 1.5;
-      text-transform: uppercase; letter-spacing: 0.06em;
+    .split-col .s-label.accent { color: var(--accent); }
+    .split-col .s-label.red { color: var(--red); }
+    .split-col .s-label.green { color: var(--green); }
+    .split-col .s-body {
+      font-size: clamp(18px, 2vw, 26px); line-height: 1.45; font-weight: 600;
     }
 
-    /* ── Closing ── */
-    .slide.closing { align-items: center; text-align: center; }
-    .slide.closing .summary {
-      max-width: 780px; font-size: clamp(17px, 2vw, 24px);
-      line-height: 1.7; color: var(--text); margin-bottom: 52px;
+    /* ── Stat row ── */
+    .stat-row {
+      display: flex;
+      gap: 64px;
+      align-items: flex-start;
     }
-    .slide.closing .summary strong { color: var(--accent); }
-    .slide.closing h2 {
-      font-size: clamp(38px, 5vw, 60px); font-weight: 700; margin-bottom: 16px;
+    .stat { text-align: center; }
+    .stat .n {
+      font-size: clamp(48px, 7vw, 96px);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--green);
     }
-    .slide.closing .contact { font-size: 15px; color: var(--muted); }
+    .stat .l {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      max-width: 160px;
+    }
+
+    /* ── Full-bleed color ── */
+    .slide.red-bg { background: #140808; }
+    .slide.green-bg { background: #081408; }
+    .slide.dark-bg { background: #0a0a0a; }
 
     /* ── Nav ── */
     #nav {
@@ -194,15 +152,14 @@
       display: flex; align-items: center; gap: 20px; z-index: 100;
     }
     #nav button {
-      background: var(--surface); border: 1px solid var(--border); color: var(--text);
-      width: 42px; height: 42px; border-radius: 50%; font-size: 17px; cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
+      background: #111; border: 1px solid #222; color: var(--text);
+      width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s;
     }
-    #nav button:hover { background: var(--border); border-color: var(--accent); }
-    #nav button:disabled { opacity: 0.25; cursor: default; }
-    #counter { font-size: 12px; color: var(--muted); min-width: 56px; text-align: center; letter-spacing: 0.05em; }
-
+    #nav button:hover { border-color: var(--accent); }
+    #nav button:disabled { opacity: 0.2; cursor: default; }
+    #counter { font-size: 12px; color: var(--muted); min-width: 48px; text-align: center; }
     #progress {
       position: fixed; top: 0; left: 0; height: 2px;
       background: var(--accent); transition: width 0.2s ease; z-index: 100;
@@ -210,208 +167,142 @@
   </style>
 </head>
 <body>
-
 <div id="progress"></div>
 <div id="deck">
 
   <!-- 0. Title -->
-  <div class="slide title active">
-    <div class="eyebrow">PM Case Study &nbsp;·&nbsp; BuildVision</div>
-    <h1>Project Scheduling<br>Relaunch at Sitetracker</h1>
-    <div class="subtitle">From scheduling tech debt to production-ready enterprise infrastructure — a two-year build across three chapters.</div>
-    <div class="meta">Nathan Stankowski &nbsp;·&nbsp; Lead PM</div>
+  <div class="slide">
+    <div class="eyebrow">PM Case Study</div>
+    <h1>Project Scheduling<br><span class="accent">Relaunch</span></h1>
+    <div class="sub">Sitetracker &nbsp;·&nbsp; 2024–2026</div>
   </div>
 
-  <!-- 1. Context: Sitetracker -->
-  <div class="slide chapter">
-    <div class="ch-label">Context</div>
-    <h2>B2B enterprise software for the infrastructure that powers the energy transition.</h2>
-    <div class="ch-note">Solar, BESS, Wind, EV Charging — from "should we build?" through construction and commissioning to operations and asset management. One system of record for the whole lifecycle.</div>
+  <!-- 1. The space -->
+  <div class="slide">
+    <div class="eyebrow accent">The Space</div>
+    <h2>Critical infrastructure.<br>Solar, BESS, Wind, EV.</h2>
+    <div class="img-slot">[ field photo — solar farm or construction site ]</div>
   </div>
 
-  <!-- 2. Context: the moment -->
-  <div class="slide two-col">
-    <h2>The Moment I Joined</h2>
-    <div class="columns">
-      <div>
-        <div class="col-label">The Company</div>
-        <div class="col-body">2023. New PM leader, new PM team, new product strategy. The org had just rebuilt the PM function twice. The shift: from analysis paralysis and product silos to founder-mode, product-led growth. I was 12 months in when this story starts.</div>
+  <!-- 2. My role -->
+  <div class="slide">
+    <div class="eyebrow accent">My Role</div>
+    <h2>Start: define and deliver the features.<br>End: enable the organization.</h2>
+  </div>
+
+  <!-- 3. Ch1 -->
+  <div class="slide dark-bg">
+    <div class="eyebrow accent">Chapter 1 &nbsp;·&nbsp; 2024</div>
+    <h1>Scheduling<br>Tech Debt</h1>
+  </div>
+
+  <!-- 4. Dead bodies -->
+  <div class="slide">
+    <div class="eyebrow">The Audit</div>
+    <h2>"Let me show you where<br>the dead bodies are hidden."</h2>
+    <div class="sub">My lead engineer walked me through the architecture before I wrote a single spec.</div>
+  </div>
+
+  <!-- 5. What we found — image slot -->
+  <div class="slide">
+    <div class="eyebrow accent">What I Found</div>
+    <div class="split">
+      <div class="split-col">
+        <div class="s-label red">Architecture</div>
+        <div class="s-body">Data locked between project and activity. Logic tied to sync. Massive compute overhead.</div>
       </div>
-      <div>
-        <div class="col-label">The Mission</div>
-        <div class="col-body">Win market share in Solar Development and Construction. We had EV Charging references that opened the door. Now we needed sales that led with Solar use cases — and customers who could prove it. My role: start by defining and delivering the features. End by enabling the entire organization.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. Chapter 1 -->
-  <div class="slide chapter">
-    <div class="ch-label">Chapter 1 &nbsp;·&nbsp; 2024</div>
-    <h2>Scheduling Tech Debt</h2>
-    <div class="ch-note">Before writing a single spec, I needed to understand what we were actually working with.</div>
-  </div>
-
-  <!-- 4. The Denver Summit -->
-  <div class="slide content">
-    <h2>Where the Dead Bodies Were Hidden</h2>
-    <ul>
-      <li>My lead engineer took me through the architecture. <strong>Three structural problems</strong>: a deep data lock between project and activity, a UI so fragile that the smallest change caused support pain, and scheduling logic tied to sync with massive compute overhead.</li>
-      <li>I went to Sales and Marketing next. Templates were being pitched as a strength — but <strong>Project Managers experienced them as a constraint</strong>. The central nervous system of schedule and process control was missing entirely.</li>
-      <li>This audit became the foundation for the entire 2-year strategy. I needed to know what was real before I could commit to anything.</li>
-    </ul>
-  </div>
-
-  <!-- 5. Phase 1 -->
-  <div class="slide content">
-    <h2>Phase 1: Rebuild for Flexibility</h2>
-    <ul>
-      <li>I scoped Phase 1 around one goal: <strong>break the rigidity</strong>. Rebuild the UI so it could flex. Ship Ad Hoc Activities, Cross-Project Dependencies, and train the market on what the existing product could already do.</li>
-      <li>I ran Marketing and training campaigns on capabilities customers didn't know they had — not to obscure the gaps, but to <strong>build credibility while we closed them</strong>.</li>
-      <li>It worked. <strong>Sales increased in magnitude and velocity.</strong> Which is when things got complicated.</li>
-    </ul>
-  </div>
-
-  <!-- 6. Chapter 2 -->
-  <div class="slide chapter red">
-    <div class="ch-label">Chapter 2 &nbsp;·&nbsp; 2025</div>
-    <h2>Catastrophic Success</h2>
-    <div class="ch-note">Three customers using the product successfully. Fifteen scheduled to go live in January. That's when the RED ALERT hit.</div>
-  </div>
-
-  <!-- 7. The alert -->
-  <div class="slide alert">
-    <div class="alert-label">January 2025 &nbsp;·&nbsp; Red Alert</div>
-    <h2>15 Customers.<br>Not Ready.</h2>
-    <div class="alert-body">
-      Three customers had gotten along with the 2024 improvements. Fifteen were going live in January.<br><br>
-      <strong>The lesson: three is not enough signal.</strong> A successful sale does not equal product value realized or features understood. We had sold something we hadn't yet fully built.
-    </div>
-  </div>
-
-  <!-- 8. The pivot -->
-  <div class="slide pivot">
-    <h2>The Hard Pivot</h2>
-    <div class="pivot-grid">
-      <div class="pivot-col before">
-        <div class="p-label">What we stopped</div>
-        <ul>
-          <li>AI features — deprioritized entirely</li>
-          <li>Risk management roadmap — paused</li>
-          <li>Secondary feature expansion</li>
-          <li>Broad go-live schedule</li>
-        </ul>
-      </div>
-      <div class="pivot-col after">
-        <div class="p-label">What I did instead</div>
-        <ul>
-          <li>100% focus on scheduling overhaul — 6 to 12 months</li>
-          <li>Embedded PMs with every implementation team</li>
-          <li>Sharpened the roadmap to the critical path only</li>
-          <li>Declared implementation a product problem — my team owned it</li>
-        </ul>
+      <div class="split-col">
+        <div class="s-label red">Go-to-Market</div>
+        <div class="s-body">Templates pitched as a strength. Project Managers experienced them as a cage.</div>
       </div>
     </div>
   </div>
 
-  <!-- 9. Implementation as product -->
-  <div class="slide content red">
-    <h2>Implementation Is a Product Problem</h2>
-    <ul>
-      <li>I stopped treating implementation as someone else's problem and <strong>took direct responsibility</strong>. My team would implement our beta partners, run production support, and own the launch outcome.</li>
-      <li>This wasn't a process change — it was a reframe. <strong>Time-to-Value is part of the product.</strong> If customers couldn't get live, the features didn't matter.</li>
-      <li>I launched a major internal PR campaign to realign the organization. Then I went to work on the three customers who could actually validate what we were building.</li>
-    </ul>
+  <!-- 6. Phase 1 result -->
+  <div class="slide">
+    <div class="eyebrow accent">Phase 1 Result</div>
+    <h2>Rebuild for flexibility.<br>Sales increased.</h2>
+    <div class="sub">Ad Hoc Activities. Cross-Project Dependencies. Trained the market on what already existed.</div>
   </div>
 
-  <!-- 10. Chapter 3 -->
-  <div class="slide chapter green">
-    <div class="ch-label">Chapter 3 &nbsp;·&nbsp; 2026</div>
-    <h2>Real Success</h2>
-    <div class="ch-note">Three of the fifteen became critical beta partners. Deep embedding. Full production support as the guarantee. Monthly, testable, deployable deliverables.</div>
+  <!-- 7. Ch2 -->
+  <div class="slide red-bg">
+    <div class="eyebrow red">Chapter 2 &nbsp;·&nbsp; 2025</div>
+    <h1 class="red">Catastrophic<br>Success</h1>
   </div>
 
-  <!-- 11. How we worked -->
-  <div class="slide content green">
-    <h2>Scrappy, Structured, Deliberate</h2>
-    <ul>
-      <li>I selected three beta partners and embedded my team directly in their implementations — <strong>full production support as the guarantee</strong> that we would not abandon them mid-launch.</li>
-      <li>Monthly deployable deliverables: <strong>Drag and Drop, Logic as Excel Data, UI for net-new projects, Migration tooling</strong>. Each one tested with real users before the next was scoped.</li>
-      <li>I ran retrospectives after every cycle. What broke, what held, what the customer actually needed vs. what we assumed. The roadmap updated every month.</li>
-    </ul>
+  <!-- 8. Red alert -->
+  <div class="slide red-bg">
+    <div class="eyebrow red">January 2025</div>
+    <h2 class="red">3 customers working.<br>15 going live.<br>Not ready.</h2>
+    <div class="sub" style="color:#a06060;">Three is not enough signal. A successful sale is not product value realized.</div>
   </div>
 
-  <!-- 12. AI — now grounded -->
-  <div class="slide content green">
-    <h2>AI — Back on the Roadmap, Differently</h2>
-    <ul>
-      <li>When AI came back into scope, it was <strong>grounded in core product value</strong> — not a feature layer on an unstable foundation.</li>
-      <li>I used AI to generate high-fidelity test scenarios — schedules for large Solar Plants and BESS systems — to <strong>pressure-test the CPM engine against real-world complexity</strong> before any customer saw it.</li>
-      <li>The north star: <strong>Implementation Zero</strong> — zero time-to-value for project scheduling. The AI roadmap is built around that goal: schedule coordination, migration, and dependency suggestion.</li>
-    </ul>
+  <!-- 9. The pivot -->
+  <div class="slide red-bg">
+    <div class="eyebrow red">The Call I Made</div>
+    <h2>Implementation<br>is a product problem.</h2>
+    <div class="sub" style="color:#a06060;">No AI. No Risk Management. 100% on scheduling. My team owns the launch.</div>
   </div>
 
-  <!-- 13. Conflict -->
-  <div class="slide content">
-    <h2>The Hardest Conversation</h2>
-    <ul>
-      <li>Sales was selling Advanced scheduling capabilities. Implementation was deploying Standard logic. <strong>Customers were getting something different from what they were promised.</strong></li>
-      <li>I ran a workshop to align Sales on the two distinct frameworks. Then I restructured the implementation process: <strong>no deployment without sign-off from the customer's own Project Managers</strong> on the scheduling logic.</li>
-      <li>The pressure to make exceptions was constant — every account felt like a special case. I held the line. <strong>No exceptions.</strong> The process only works if it's universal.</li>
-    </ul>
+  <!-- 10. Ch3 -->
+  <div class="slide green-bg">
+    <div class="eyebrow green">Chapter 3 &nbsp;·&nbsp; 2026</div>
+    <h1 class="green">Real<br>Success</h1>
   </div>
 
-  <!-- 14. Outcomes -->
-  <div class="slide metrics">
-    <h2>Where It Stands</h2>
-    <div class="metric-grid">
-      <div class="metric">
-        <div class="number">3</div>
-        <div class="m-label">Full production customers on Advanced Scheduling — live, supported, referenceable</div>
+  <!-- 11. How -->
+  <div class="slide green-bg">
+    <div class="eyebrow green">The Approach</div>
+    <h2>3 beta partners.<br>Monthly deployables.<br>Full production support.</h2>
+    <div class="sub" style="color:#5a9070;">Drag and drop. Logic as Excel data. Migration tooling. One thing at a time.</div>
+  </div>
+
+  <!-- 12. AI -->
+  <div class="slide">
+    <div class="eyebrow accent">AI — When the Foundation Was Ready</div>
+    <h2>Synthetic schedules.<br>Real-world stress tests.<br>Zero surprises at launch.</h2>
+    <div class="sub">Generated high-fidelity test scenarios — Solar Plants, BESS — to pressure-test the CPM engine before any customer saw it.</div>
+  </div>
+
+  <!-- 13. Outcomes -->
+  <div class="slide green-bg">
+    <div class="eyebrow green">Outcomes</div>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="n">3</div>
+        <div class="l">Full production customers. Live and referenceable.</div>
       </div>
-      <div class="metric">
-        <div class="number">P6 → ST</div>
-        <div class="m-label">Major Solar customer migrated their entire scheduling operation from Primavera P6</div>
+      <div class="stat">
+        <div class="n" style="font-size: clamp(32px,4vw,56px); padding-top:16px;">P6 → ST</div>
+        <div class="l">Solar customer off Primavera. Entire operation migrated.</div>
       </div>
-      <div class="metric">
-        <div class="number">→ 0</div>
-        <div class="m-label">Implementation Zero — the active goal: zero time-to-value for project scheduling</div>
+      <div class="stat">
+        <div class="n">→ 0</div>
+        <div class="l">Implementation Zero. The active goal.</div>
       </div>
     </div>
   </div>
 
-  <!-- 15. Retrospective -->
-  <div class="slide content">
-    <h2>What I'd Do Differently</h2>
-    <ul>
-      <li><strong>Three is not enough signal.</strong> I'd instrument every stage — market interest, sales value, implementation progress, user adoption — from day one. Qualitative and quantitative, always. If it's not tracked, it's not managed.</li>
-      <li><strong>GTM is part of the product.</strong> The Time-to-Value journey needs to be fully mapped and directly experienced by the product team through pilot implementations before you hand it to the rest of the org.</li>
-      <li><strong>Earlier enablement.</strong> The shift from milestone tracking to CPM-based scheduling required a cultural change internally. I should have built CPM fundamentals into training from the start — not after the RED ALERT.</li>
-    </ul>
-  </div>
-
-  <!-- 16. Closing -->
-  <div class="slide closing">
-    <div class="summary">
-      I prioritized <strong>a stable foundation over feature velocity</strong> — and when the catastrophic success moment hit, I treated the implementation crisis as a product problem instead of passing it to another team.<br><br>
-      That decision is what turned fifteen potential failures into three real, referenceable customers.
-    </div>
-    <h2>Questions?</h2>
-    <div class="contact">Nathan Stankowski</div>
+  <!-- 14. Closing -->
+  <div class="slide">
+    <div class="eyebrow">The Through Line</div>
+    <h2>Foundation first.<br>Then scale.</h2>
+    <div class="sub">When the crisis hit, I treated it as a product problem — not someone else's. That's what turned fifteen potential failures into three real customers.</div>
   </div>
 
 </div>
 
 <div id="nav">
-  <button id="btn-prev" title="Previous (←)">&#8592;</button>
-  <span id="counter">1 / 17</span>
-  <button id="btn-next" title="Next (→)">&#8594;</button>
+  <button id="btn-prev">&#8592;</button>
+  <span id="counter">1 / 15</span>
+  <button id="btn-next">&#8594;</button>
 </div>
 
 <script>
   var slides = document.querySelectorAll('.slide');
   var total = slides.length;
   var current = 0;
-
   var progress = document.getElementById('progress');
   var counter = document.getElementById('counter');
   var btnPrev = document.getElementById('btn-prev');
@@ -431,12 +322,8 @@
   btnNext.addEventListener('click', function() { goTo(current + 1); });
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
-      e.preventDefault(); goTo(current + 1);
-    }
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault(); goTo(current - 1);
-    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
     if (e.key === 'Home') { e.preventDefault(); goTo(0); }
     if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
   });
