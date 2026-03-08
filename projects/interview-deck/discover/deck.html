@@ -173,22 +173,68 @@
       font-size: 10px; color: #555;
       letter-spacing: 0.08em; z-index: 100;
     }
+
+    #chapter-indicator {
+      position: fixed; top: 20px; left: 28px;
+      font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); z-index: 100;
+      transition: opacity 0.2s;
+    }
+    #chapter-indicator.accent { color: var(--accent); }
+    #chapter-indicator.red { color: var(--red); }
+    #chapter-indicator.green { color: var(--green); }
+    #chapter-indicator.hidden { opacity: 0; }
+
+    /* TOC slide */
+    .toc-list {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 20px;
+      text-align: left;
+    }
+    .toc-list li {
+      font-size: clamp(18px, 2.2vw, 28px);
+      font-weight: 600;
+      padding-left: 24px;
+      position: relative;
+      color: var(--text);
+    }
+    .toc-list li::before {
+      content: "—"; position: absolute; left: 0;
+      color: var(--muted); font-weight: 400;
+    }
+    .toc-list li.c1::before { color: var(--accent); }
+    .toc-list li.c2::before { color: var(--red); }
+    .toc-list li.c3::before { color: var(--green); }
+    .toc-list li span { font-weight: 400; color: var(--muted); font-size: 0.75em; margin-left: 10px; }
   </style>
 </head>
 <body>
 <div id="progress"></div>
 <div id="version">v1.1</div>
+<div id="chapter-indicator" class="hidden"></div>
 <div id="deck">
 
   <!-- 0. Title -->
-  <div class="slide">
+  <div class="slide" data-chapter="">
     <div class="eyebrow">PM Case Study</div>
     <h1>Project Scheduling<br><span class="accent">Relaunch</span></h1>
     <div class="sub">Sitetracker &nbsp;·&nbsp; 2024–2026</div>
   </div>
 
+  <!-- TOC -->
+  <div class="slide" data-chapter="">
+    <div class="eyebrow accent">Overview</div>
+    <ul class="toc-list">
+      <li>Context <span>Sitetracker &amp; the mission</span></li>
+      <li class="c1">Chapter 1 <span>Scheduling Tech Debt &nbsp;·&nbsp; 2024</span></li>
+      <li class="c2">Chapter 2 <span>Catastrophic Success &nbsp;·&nbsp; 2025</span></li>
+      <li class="c3">Chapter 3 <span>Real Success &nbsp;·&nbsp; 2026</span></li>
+      <li>Retrospective <span>What I'd do differently</span></li>
+    </ul>
+  </div>
+
   <!-- 1. The space -->
-  <div class="slide">
+  <div class="slide" data-chapter="Context">
     <div class="eyebrow accent">The Space</div>
     <img src="images/sitetracker-logo.svg" alt="Sitetracker" style="height:48px; margin-bottom:8px;">
     <h2>Critical infrastructure.<br>Solar, BESS, Wind, EV.</h2>
@@ -196,35 +242,35 @@
   </div>
 
   <!-- 1b. The strategy -->
-  <div class="slide">
+  <div class="slide" data-chapter="Context">
     <div class="eyebrow accent">The Strategy</div>
     <h2>EV Charging opened the door.<br>Solar was the beachhead.</h2>
     <div class="sub">We had references. We needed Solar use cases and customers who could prove it. Go after Developers — that's our strength — and become domain experts.</div>
   </div>
 
   <!-- 2. My role -->
-  <div class="slide">
+  <div class="slide" data-chapter="Context">
     <div class="eyebrow accent">My Role</div>
     <h2>PM team rebuilt twice.<br>Year one. Go.</h2>
     <div class="sub">From analysis paralysis and product silos to founder mode and product lead. My job: define and deliver the features, then enable the entire organization.</div>
   </div>
 
   <!-- 3. Ch1 -->
-  <div class="slide dark-bg">
+  <div class="slide dark-bg" data-chapter="ch1">
     <div class="eyebrow accent">Chapter 1 &nbsp;·&nbsp; 2024</div>
     <h1>Scheduling<br>Tech Debt</h1>
     <div class="img-slot"><img src="images/calvin-tech-debt.png" alt="Tech debt"></div>
   </div>
 
   <!-- 4. Dead bodies -->
-  <div class="slide">
+  <div class="slide" data-chapter="ch1">
     <div class="eyebrow">The Denver Summit</div>
     <h2>"Let me show you where<br>the dead bodies are hidden."</h2>
     <div class="sub">3 lead engineers. 3 days. I called the summit before writing a single spec.</div>
   </div>
 
   <!-- 5. What we found -->
-  <div class="slide">
+  <div class="slide" data-chapter="ch1">
     <div class="eyebrow accent">What I Found</div>
     <div class="split">
       <div class="split-col">
@@ -239,14 +285,14 @@
   </div>
 
   <!-- 6. The plan -->
-  <div class="slide">
+  <div class="slide" data-chapter="ch1">
     <div class="eyebrow accent">The Plan</div>
     <h2>Flexibility now.<br>Power later.</h2>
     <div class="sub">Rebuild the UI. Ship Ad Hoc Activities and Cross-Project Dependencies. Get Sales and Marketing aligned on what we could actually deliver — and train the market on what already existed.</div>
   </div>
 
   <!-- 6b. Sales growth -->
-  <div class="slide">
+  <div class="slide" data-chapter="ch1">
     <div class="eyebrow accent">The Numbers</div>
     <div class="stat-row">
       <div class="stat">
@@ -265,47 +311,47 @@
   </div>
 
   <!-- 7. Ch2 -->
-  <div class="slide red-bg">
+  <div class="slide red-bg" data-chapter="ch2">
     <div class="eyebrow red">Chapter 2 &nbsp;·&nbsp; 2025</div>
     <h1 class="red">Catastrophic<br>Success</h1>
   </div>
 
   <!-- 8. Red alert -->
-  <div class="slide red-bg">
+  <div class="slide red-bg" data-chapter="ch2">
     <div class="eyebrow red">January 2025</div>
     <h2 class="red">3 customers working.<br>15 going live.<br>Not ready.</h2>
     <div class="sub" style="color:#a06060;">Three is not enough signal. A successful sale is not product value realized.</div>
   </div>
 
   <!-- 9. The pivot -->
-  <div class="slide red-bg">
+  <div class="slide red-bg" data-chapter="ch2">
     <div class="eyebrow red">The Call I Made</div>
     <h2>Implementation<br>is a product problem.</h2>
     <div class="sub" style="color:#a06060;">No AI. No Risk Management. 100% on scheduling overhaul. I embedded my team with every implementation. We own the launch or we don't ship.</div>
   </div>
 
   <!-- 10. Ch3 -->
-  <div class="slide green-bg">
+  <div class="slide green-bg" data-chapter="ch3">
     <div class="eyebrow green">Chapter 3 &nbsp;·&nbsp; 2026</div>
     <h1 class="green">Real<br>Success</h1>
   </div>
 
   <!-- 11. How -->
-  <div class="slide green-bg">
+  <div class="slide green-bg" data-chapter="ch3">
     <div class="eyebrow green">The Approach</div>
     <h2>3 beta partners.<br>Monthly deployables.<br>Full production support.</h2>
     <div class="sub" style="color:#5a9070;">Drag and Drop. Logic as Excel Data. Net-new project UI. Migration solution. Ship one thing. Test it. Repeat.</div>
   </div>
 
   <!-- 12. AI -->
-  <div class="slide green-bg">
+  <div class="slide green-bg" data-chapter="ch3">
     <div class="eyebrow green">AI — Grounded in Core Value</div>
     <h2>Implementation Zero.<br>Zero time-to-value<br>for project scheduling.</h2>
     <div class="sub" style="color:#5a9070;">AI comes back on the roadmap — but now it's built around schedule coordination, migration, and validation. Not a feature layer on an unstable foundation.</div>
   </div>
 
   <!-- 13. Outcomes -->
-  <div class="slide green-bg">
+  <div class="slide green-bg" data-chapter="ch3">
     <div class="eyebrow green">Outcomes</div>
     <div class="stat-row">
       <div class="stat">
@@ -324,7 +370,7 @@
   </div>
 
   <!-- 14. Retro -->
-  <div class="slide">
+  <div class="slide" data-chapter="Retrospective">
     <div class="eyebrow">What I'd Do Differently</div>
     <div class="split three" style="max-width:1100px; gap:40px;">
       <div class="split-col">
@@ -343,7 +389,7 @@
   </div>
 
   <!-- 15. Closing -->
-  <div class="slide">
+  <div class="slide" data-chapter="Retrospective">
     <div class="eyebrow">The Through Line</div>
     <h2>Foundation first.<br>Then scale.</h2>
     <div class="sub">When the crisis hit, I treated it as a product problem — not someone else's. That's what turned fifteen potential failures into three real customers.</div>
@@ -353,7 +399,7 @@
 
 <div id="nav">
   <button id="btn-prev">&#8592;</button>
-  <span id="counter">1 / 19</span>
+  <span id="counter">1 / 21</span>
   <button id="btn-next">&#8594;</button>
 </div>
 
@@ -365,6 +411,19 @@
   var counter = document.getElementById('counter');
   var btnPrev = document.getElementById('btn-prev');
   var btnNext = document.getElementById('btn-next');
+  var chapterEl = document.getElementById('chapter-indicator');
+
+  var chapterLabels = {
+    'ch1': 'Chapter 1 · Scheduling Tech Debt',
+    'ch2': 'Chapter 2 · Catastrophic Success',
+    'ch3': 'Chapter 3 · Real Success',
+    'Context': 'Context',
+    'Retrospective': 'Retrospective'
+  };
+  var chapterColors = {
+    'ch1': 'accent', 'ch2': 'red', 'ch3': 'green',
+    'Context': '', 'Retrospective': ''
+  };
 
   function goTo(n) {
     slides[current].classList.remove('active');
@@ -374,6 +433,15 @@
     progress.style.width = ((current + 1) / total * 100) + '%';
     btnPrev.disabled = current === 0;
     btnNext.disabled = current === total - 1;
+
+    var ch = slides[current].dataset.chapter || '';
+    chapterEl.className = '';
+    if (!ch) {
+      chapterEl.classList.add('hidden');
+    } else {
+      chapterEl.textContent = chapterLabels[ch] || ch;
+      if (chapterColors[ch]) chapterEl.classList.add(chapterColors[ch]);
+    }
   }
 
   btnPrev.addEventListener('click', function() { goTo(current - 1); });
