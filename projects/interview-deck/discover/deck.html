@@ -108,6 +108,9 @@
       max-width: 1000px;
       text-align: left;
     }
+    .split.three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
     .split-col { display: flex; flex-direction: column; gap: 16px; }
     .split-col .s-label {
       font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
@@ -184,10 +187,18 @@
     <div class="img-slot"><img src="images/calvin-solar.png" alt="The space"></div>
   </div>
 
+  <!-- 1b. The strategy -->
+  <div class="slide">
+    <div class="eyebrow accent">The Strategy</div>
+    <h2>EV Charging opened the door.<br>Solar was the beachhead.</h2>
+    <div class="sub">We had references. We needed Solar use cases and customers who could prove it. Go after Developers — that's our strength — and become domain experts.</div>
+  </div>
+
   <!-- 2. My role -->
   <div class="slide">
     <div class="eyebrow accent">My Role</div>
-    <h2>Start: define and deliver the features.<br>End: enable the organization.</h2>
+    <h2>PM team rebuilt twice.<br>Year one. Go.</h2>
+    <div class="sub">From analysis paralysis and product silos to founder mode and product lead. My job: define and deliver the features, then enable the entire organization.</div>
   </div>
 
   <!-- 3. Ch1 -->
@@ -204,26 +215,26 @@
     <div class="sub">3 lead engineers. 3 days. I called the summit before writing a single spec.</div>
   </div>
 
-  <!-- 5. What we found — image slot -->
+  <!-- 5. What we found -->
   <div class="slide">
     <div class="eyebrow accent">What I Found</div>
     <div class="split">
       <div class="split-col">
         <div class="s-label red">Architecture</div>
-        <div class="s-body">Data locked between project and activity. Logic tied to sync. Massive compute overhead.</div>
+        <div class="s-body">Deep lock between project and activity. Logic tied to sync. Any UI change caused product support pain.</div>
       </div>
       <div class="split-col">
         <div class="s-label red">Go-to-Market</div>
-        <div class="s-body">Templates pitched as a strength. Project Managers experienced them as a cage.</div>
+        <div class="s-body">No differentiation — only the assumption we could do anything. Templates were a cage for Project Managers, not a selling point.</div>
       </div>
     </div>
   </div>
 
-  <!-- 6. Phase 1 result -->
+  <!-- 6. The plan -->
   <div class="slide">
-    <div class="eyebrow accent">Phase 1 Result</div>
-    <h2>Rebuild for flexibility.<br>Sales increased.</h2>
-    <div class="sub">Ad Hoc Activities. Cross-Project Dependencies. Trained the market on what already existed.</div>
+    <div class="eyebrow accent">The Plan</div>
+    <h2>Flexibility now.<br>Power later.</h2>
+    <div class="sub">Rebuild the UI. Ship Ad Hoc Activities and Cross-Project Dependencies. Get Sales and Marketing aligned on what we could actually deliver — and train the market on what already existed.</div>
   </div>
 
   <!-- 6b. Sales growth -->
@@ -262,7 +273,7 @@
   <div class="slide red-bg">
     <div class="eyebrow red">The Call I Made</div>
     <h2>Implementation<br>is a product problem.</h2>
-    <div class="sub" style="color:#a06060;">No AI. No Risk Management. 100% on scheduling. My team owns the launch.</div>
+    <div class="sub" style="color:#a06060;">No AI. No Risk Management. 100% on scheduling overhaul. I embedded my team with every implementation. We own the launch or we don't ship.</div>
   </div>
 
   <!-- 10. Ch3 -->
@@ -275,14 +286,14 @@
   <div class="slide green-bg">
     <div class="eyebrow green">The Approach</div>
     <h2>3 beta partners.<br>Monthly deployables.<br>Full production support.</h2>
-    <div class="sub" style="color:#5a9070;">Drag and drop. Logic as Excel data. Migration tooling. One thing at a time.</div>
+    <div class="sub" style="color:#5a9070;">Drag and Drop. Logic as Excel Data. Net-new project UI. Migration solution. Ship one thing. Test it. Repeat.</div>
   </div>
 
   <!-- 12. AI -->
-  <div class="slide">
-    <div class="eyebrow accent">AI — When the Foundation Was Ready</div>
-    <h2>Synthetic schedules.<br>Real-world stress tests.<br>Zero surprises at launch.</h2>
-    <div class="sub">Generated high-fidelity test scenarios — Solar Plants, BESS — to pressure-test the CPM engine before any customer saw it.</div>
+  <div class="slide green-bg">
+    <div class="eyebrow green">AI — Grounded in Core Value</div>
+    <h2>Implementation Zero.<br>Zero time-to-value<br>for project scheduling.</h2>
+    <div class="sub" style="color:#5a9070;">AI comes back on the roadmap — but now it's built around schedule coordination, migration, and validation. Not a feature layer on an unstable foundation.</div>
   </div>
 
   <!-- 13. Outcomes -->
@@ -307,14 +318,18 @@
   <!-- 14. Retro -->
   <div class="slide">
     <div class="eyebrow">What I'd Do Differently</div>
-    <div class="split" style="max-width:900px;">
+    <div class="split three" style="max-width:1100px; gap:40px;">
       <div class="split-col">
-        <div class="s-label accent">3 is not enough signal</div>
-        <div class="s-body" style="font-size:clamp(14px,1.5vw,18px); font-weight:400; color:var(--muted);">Map and track every KPI — marketing, sales, implementation, adoption — from day one. Always.</div>
+        <div class="s-label accent">Track everything from day one</div>
+        <div class="s-body" style="font-size:clamp(13px,1.4vw,17px); font-weight:400; color:var(--muted);">Marketing, sales, implementation, adoption, growth — qualitative and quantitative, always. If it's not tracked, it's not managed.</div>
       </div>
       <div class="split-col">
-        <div class="s-label accent">GTM is a product problem</div>
-        <div class="s-body" style="font-size:clamp(14px,1.5vw,18px); font-weight:400; color:var(--muted);">Validate every phase of the GTM process with each prototype. Your customer's adoption timeline is your problem.</div>
+        <div class="s-label accent">GTM is a product requirement</div>
+        <div class="s-body" style="font-size:clamp(13px,1.4vw,17px); font-weight:400; color:var(--muted);">Validate every phase of the process with each prototype. The product team needs to live the customer's Time-to-Value journey before handing it to anyone else.</div>
+      </div>
+      <div class="split-col">
+        <div class="s-label accent">Enterprise adoption is slow — own it</div>
+        <div class="s-body" style="font-size:clamp(13px,1.4vw,17px); font-weight:400; color:var(--muted);">Your customer's problem is your problem. If their adoption timeline blocks your ability to move fast, that's a product problem — not an implementation one.</div>
       </div>
     </div>
   </div>
@@ -330,7 +345,7 @@
 
 <div id="nav">
   <button id="btn-prev">&#8592;</button>
-  <span id="counter">1 / 17</span>
+  <span id="counter">1 / 19</span>
   <button id="btn-next">&#8594;</button>
 </div>
 
