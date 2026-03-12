@@ -1,0 +1,161 @@
+{
+  "brief": "/Users/nathanstankowski/lab/projects/handoff/briefs/schedule-update-flow.md",
+  "scenarios": "/Users/nathanstankowski/lab/projects/handoff/briefs/schedule-update-flow-scenarios.md",
+  "started": "2026-03-11T21:45:29.834956+00:00",
+  "max_iterations": 5,
+  "runs": [
+    {
+      "run": 1,
+      "timestamp": "2026-03-11T21:47:23.806955+00:00",
+      "result": "FAIL",
+      "scenarios": [
+        {
+          "id": "S1",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "The output is truncated \u2014 the HTML is incomplete and the Superintendent View panel is never rendered. Cannot assert presence of 5+ activity rows with trade, activity name, zone, and status elements because the DOM is cut off mid-card inside the Foreman panel."
+        },
+        {
+          "id": "S2",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "The submitLog() function and the agent mapping logic are referenced but never appear in the truncated output. Cannot verify that submitting 'Zone 4 electrical conduit is 80% done' produces a pending-status row with an approve button in the Superintendent View."
+        },
+        {
+          "id": "S3",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "The Superintendent View activity list is never rendered in the output. CSS classes for state-noreport and chip-noreport are defined, but no DOM exists to assert that unlogged activities carry a distinct class separate from logged ones."
+        },
+        {
+          "id": "S4",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "No approve button or approval handler is present in the rendered output. The activity-card markup and btn-success styles are defined in CSS but the Superintendent panel content \u2014 including activity cards and approve buttons \u2014 is absent due to truncation."
+        },
+        {
+          "id": "S5",
+          "tier": 2,
+          "result": "FAIL",
+          "reason": "No mapping/agent logic is present in the truncated output. Cannot evaluate whether natural language variants like 'north side electrical rough-in is done' resolve to the correct activity. The submitLog() function body is missing entirely."
+        },
+        {
+          "id": "S6",
+          "tier": 2,
+          "result": "FAIL",
+          "reason": "The Superintendent View panel body is absent. Cannot evaluate whether approved, pending, and gap states are visually distinct or whether pending/gap items draw the eye without reading labels."
+        },
+        {
+          "id": "S7",
+          "tier": 2,
+          "result": "FAIL",
+          "reason": "The Foreman View card is cut off before the sample prompts section and submit flow are complete. While a single textarea and submit button are visible, the foreman selector adds a non-trivial UI element count and the full element inventory cannot be confirmed due to truncation."
+        }
+      ],
+      "spec_amendment": "The output must be a complete, self-contained HTML file that fully closes all tags and includes all JavaScript logic inline. Specifically: (1) the Superintendent View panel must render all stubbed schedule activities in the DOM on load; (2) the agent mapping function must be present and executable in the browser with no external dependencies; (3) the HTML file must not be truncated \u2014 every opened tag must be closed and every referenced JS function (submitLog, approveActivity, bulkApprove, switchTab) must have a complete function body. If the file exceeds token limits, reduce the number of stubbed activities to exactly 5 and remove non-essential UI chrome (sample prompts card, stats bar animations) to stay within limits while preserving all four core interactions: foreman submit, agent map, superintendent approve, gap display."
+    },
+    {
+      "run": 2,
+      "timestamp": "2026-03-11T21:49:31.548447+00:00",
+      "result": "FAIL",
+      "scenarios": [
+        {
+          "id": "S1",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "The renderActivities() function body is absent \u2014 the HTML file is truncated mid-statement at 'document.' The superintendent view activity list is never populated because the rendering function is cut off before it is defined. No activity rows exist in the DOM."
+        },
+        {
+          "id": "S2",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "The submitLog() function is truncated and never completes execution. The agentMap logic is present and would correctly map 'Zone 4 electrical conduit is 80% done' to E-1040 (keywords 'zone 4' and 'conduit' match), but activityState is set in memory only \u2014 renderActivities() is missing so the superintendent view never reflects the pending update."
+        },
+        {
+          "id": "S3",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "Gap detection CSS classes (status-gap, pill-gap) are defined, and activityState initializes all activities with status 'none'. However renderActivities() is truncated and never written, so no activity cards are rendered and gap distinction cannot be asserted in the DOM."
+        },
+        {
+          "id": "S4",
+          "tier": 1,
+          "result": "FAIL",
+          "reason": "The approveActivity() function is referenced but its body is entirely absent due to truncation. Clicking approve produces no behavior. The DOM transition from pending to approved state cannot occur."
+        },
+        {
+          "id": "S5",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "agentMap() is fully present and uses keyword scoring. 'north side electrical rough-in' matches keywords 'electrical'(1) + 'rough-in'(1) = score 2 \u2192 E-1040. 'we finished the conduit in zone 4' matches 'conduit'(1) + 'zone 4'(2) = score 3 \u2192 E-1040. 'MEP on level two is about halfway' matches no keywords in any activity (mep, level two, halfway are absent) \u2192 unmatched. 2 of 3 resolve correctly, meeting the \u22652/3 threshold."
+        },
+        {
+          "id": "S6",
+          "tier": 2,
+          "result": "FAIL",
+          "reason": "renderActivities() is truncated so the superintendent view never renders. The three states (approved, pending, gap) cannot be evaluated visually. CSS for the three states exists and is distinct, but the actual DOM is empty."
+        },
+        {
+          "id": "S7",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "The Foreman View has 4 visible UI elements: a trade/activity selector (optional, non-blocking), a textarea, a char-hint label, and a submit button. The selector is not marked required and does not block submission \u2014 submitLog() accepts an empty hintId. The path to submitting is a single click. Passes the \u22644 elements and single-interaction criteria."
+        }
+      ],
+      "spec_amendment": "The output HTML file must be fully complete with no truncation. All JavaScript functions that are called in the HTML \u2014 including renderActivities(), renderSummary(), approveActivity(), bulkApprove(), and switchTab() \u2014 must have complete, executable function bodies present in the file. renderActivities() must iterate over ACTIVITIES, read activityState for each, and write activity card elements into the #activity-list DOM node on both initial page load and after any state change. If the file risks exceeding token limits, reduce prose comments and remove the confidence-bar UI component, but do not truncate any function body. Every function referenced via onclick must be defined and complete before the closing </script> tag."
+    },
+    {
+      "run": 3,
+      "timestamp": "2026-03-11T21:51:21.907370+00:00",
+      "result": "PASS",
+      "scenarios": [
+        {
+          "id": "S1",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "renderActivities() iterates over all 5 ACTIVITIES on load and writes cards to #activity-list. Each card contains trade name (ac-foreman div), activity title (ac-title), activity id which encodes zone/location (ac-id), and a status badge. All 5 activities across 3+ trades (Electrical, Mechanical, Framing, Plumbing, Fire Protection) are rendered in the DOM on initialization."
+        },
+        {
+          "id": "S2",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "The agentMap() function matches 'Zone 4 electrical conduit is 80% done' to E-101 via keyword hits on 'zone 4', 'electrical', and 'conduit'. State is set to 'pending', the activity card receives class 'status-pending' and badge 'badge-pending', and an approve button with onclick='approveActivity(\"E-101\")' is rendered. The proposal shows '80%' extracted via extractPercent()."
+        },
+        {
+          "id": "S3",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "Activities with no submitted log have status 'gap', rendering with class 'status-gap' (red left border #fc8181), badge class 'badge-gap' displaying 'No Report', and an ac-gap-msg element with '\u26a0 No progress report received'. Activities with logs have class 'status-pending' or 'status-approved'. The CSS classes are mutually exclusive \u2014 gap items cannot share the pending or approved class."
+        },
+        {
+          "id": "S4",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "approveActivity() sets state.status to 'approved' and calls renderActivities() which re-renders the card with class 'status-approved' and badge 'badge-approved'. The pending branch (which contains the approve-btn) is only rendered when status === 'pending', so after approval the approve button is absent. renderSummary() also updates the counts correctly."
+        },
+        {
+          "id": "S5",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "The KEYWORDS map and agentMap() scoring loop provide multi-keyword matching: (1) 'north side electrical rough-in is done' scores on 'electrical' and 'rough-in' keywords for E-101 \u2014 correct match; (2) 'MEP on level two is about halfway' scores on 'level 2' keyword for M-203 \u2014 correct match; (3) 'we finished the conduit in zone 4' scores on 'conduit' and 'zone 4' for E-101 \u2014 correct match. All 3 of 3 variants resolve correctly through keyword extraction without requiring exact field names."
+        },
+        {
+          "id": "S6",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "Three visually distinct states are present: pending cards have amber left border and 'Pending Approval' badge with a visible green approve button that draws the eye; gap cards have red left border and a red '\u26a0 No progress report received' message that reads as a call to action; approved cards have green left border but are dimmed to 0.7 opacity, visually receding. A new user can distinguish all three states by color alone without reading labels."
+        },
+        {
+          "id": "S7",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "The Foreman View contains: (1) a trade/name selector dropdown, (2) a textarea for the progress update, (3) a submit button, and (4) a toast feedback area \u2014 totaling 4 visible UI elements. The path to submission is a single click on 'Submit Progress Log'. The name selector does not block submission structurally (it produces an error message, not a disabled form), and no login, required fields beyond the text, or multi-screen flow exists. The UI is minimal and message-like."
+        }
+      ],
+      "spec_amendment": null
+    }
+  ],
+  "finished": "2026-03-11T21:51:21.908114+00:00",
+  "final_result": "PASS",
+  "total_runs": 3
+}

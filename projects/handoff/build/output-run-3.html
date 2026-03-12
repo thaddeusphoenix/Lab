@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule Update Flow — Field Prototype</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f0f5; color: #1c1c1e; }
+
+  /* ── App Shell ── */
+  #app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── Left Panel: Foreman View ── */
+  #foreman-panel {
+    width: 390px; min-width: 320px; max-width: 420px;
+    display: flex; flex-direction: column;
+    background: #fff; border-right: 1px solid #d1d1d6;
+    position: relative;
+  }
+
+  /* Contact List Screen */
+  #contact-list-screen { display: flex; flex-direction: column; height: 100%; }
+  #contact-list-screen .nav-bar {
+    background: #f9f9f9; border-bottom: 1px solid #e5e5ea;
+    padding: 14px 16px 10px;
+  }
+  #contact-list-screen .nav-bar h2 { font-size: 22px; font-weight: 700; color: #1c1c1e; }
+  #contact-list-screen .nav-bar p { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+  #contact-list { flex: 1; overflow-y: auto; }
+  .contact-row {
+    display: flex; align-items: center; padding: 12px 16px;
+    border-bottom: 1px solid #f2f2f7; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .contact-row:active, .contact-row:hover { background: #f2f2f7; }
+  .contact-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600; color: #fff;
+    flex-shrink: 0; margin-right: 12px;
+  }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name { font-size: 16px; font-weight: 600; color: #1c1c1e; }
+  .contact-trade { font-size: 13px; color: #8e8e93; margin-top: 1px; }
+  .contact-preview { font-size: 13px; color: #8e8e93; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .contact-chevron { color: #c7c7cc; font-size: 14px; margin-left: 8px; }
+  .unread-dot { width: 10px; height: 10px; border-radius: 50%; background: #007aff; margin-left: 8px; flex-shrink: 0; }
+
+  /* Chat Screen */
+  #chat-screen { display: none; flex-direction: column; height: 100%; }
+  #chat-nav {
+    background: #f9f9f9; border-bottom: 1px solid #e5e5ea;
+    padding: 10px 16px; display: flex; align-items: center;
+  }
+  #back-btn {
+    background: none; border: none; color: #007aff; font-size: 16px;
+    cursor: pointer; padding: 4px 8px 4px 0; display: flex; align-items: center; gap: 4px;
+  }
+  #chat-contact-info { flex: 1; text-align: center; }
+  #chat-contact-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; margin: 0 auto 2px;
+  }
+  #chat-contact-name { font-size: 13px; font-weight: 600; color: #1c1c1e; }
+  #chat-contact-role { font-size: 11px; color: #8e8e93; }
+  .chat-spacer { width: 60px; }
+
+  #message-thread {
+    flex: 1; overflow-y: auto; padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    background: #fff;
+  }
+
+  /* Bubbles */
+  .bubble-row { display: flex; align-items: flex-end; gap: 6px; }
+  .bubble-row.outgoing { flex-direction: row-reverse; }
+  .bubble-row.incoming { flex-direction: row; }
+  .bubble {
+    max-width: 72%; padding: 9px 13px; border-radius: 18px;
+    font-size: 15px; line-height: 1.4; word-break: break-word;
+  }
+  .bubble.outgoing {
+    background: #007aff; color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.incoming {
+    background: #e9e9eb; color: #1c1c1e;
+    border-bottom-left-radius: 4px;
+  }
+  .bubble-time { font-size: 10px; color: #8e8e93; margin-bottom: 2px; text-align: center; width: 100%; }
+  .bubble-timestamp { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 2px; text-align: right; }
+  .bubble.incoming .bubble-timestamp { color: #8e8e93; }
+
+  /* Input Bar */
+  #input-bar {
+    padding: 8px 12px; background: #f9f9f9;
+    border-top: 1px solid #e5e5ea;
+    display: flex; align-items: flex-end; gap: 8px;
+  }
+  #msg-input {
+    flex: 1; border: 1px solid #d1d1d6; border-radius: 20px;
+    padding: 8px 14px; font-size: 15px; outline: none; resize: none;
+    max-height: 120px; line-height: 1.4; background: #fff;
+    font-family: inherit;
+  }
+  #msg-input:focus { border-color: #007aff; }
+  #send-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #007aff; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  #send-btn:disabled { background: #c7c7cc; cursor: default; }
+  #send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+  /* ── Right Panel: Superintendent View ── */
+  #super-panel {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    background: #f0f0f5;
+  }
+  #super-header {
+    background: #1c1c1e; color: #fff;
+    padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+  }
+  #super-header .header-left h1 { font-size: 20px; font-weight: 700; }
+  #super-header .header-left p { font-size: 13px; color: #98989d; margin-top: 2px; }
+  #super-header .header-right { display: flex; align-items: center; gap: 10px; }
+  #bulk-approve-btn {
+    background: #30d158; color: #fff; border: none;
+    padding: 8px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+  }
+  #bulk-approve-btn:hover { background: #25a244; }
+  #bulk-approve-btn:disabled { background: #48484a; color: #98989d; cursor: default; }
+
+  /* Stats Bar */
+  #stats-bar {
+    display: flex; gap: 12px; padding: 12px 24px;
+    background: #2c2c2e; flex-wrap: wrap;
+  }
+  .stat-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: #3a3a3c; border-radius: 8px; padding: 6px 12px;
+    font-size: 13px; color: #e5e5ea;
+  }
+  .stat-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-pending { background: #ff9f0a; }
+  .dot-gap { background: #ff453a; }
+  .dot-approved { background: #30d158; }
+
+  /* Activity List */
+  #activity-list {
+    flex: 1; overflow-y: auto; padding: 16px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .activity-card {
+    background: #fff; border-radius: 14px;
+    border-left: 5px solid #d1d1d6;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    overflow: hidden; transition: box-shadow 0.2s;
+  }
+  .activity-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+  .activity-card.status-pending { border-left-color: #ff9f0a; }
+  .activity-card.status-gap { border-left-color: #ff453a; }
+  .activity-card.status-approved { border-left-color: #30d158; }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px 8px; flex-wrap: wrap; gap: 8px;
+  }
+  .card-title { font-size: 15px; font-weight: 700; color: #1c1c1e; }
+  .card-id { font-size: 11px; color: #8e8e93; margin-top: 1px; }
+  .status-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-pending { background: #fff3e0; color: #e65100; }
+  .badge-gap { background: #ffeaea; color: #c62828; }
+  .badge-approved { background: #e8f5e9; color: #1b5e20; }
+
+  .card-body { padding: 0 16px 12px; }
+  .card-meta {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    font-size: 12px; color: #8e8e93; margin-bottom: 10px;
+  }
+  .card-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Progress Row */
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .progress-label { font-size: 12px; color: #8e8e93; width: 80px; flex-shrink: 0; }
+  .progress-track { flex: 1; height: 8px; background: #f2f2f7; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .fill-baseline { background: #c7c7cc; }
+  .fill-proposed { background: #ff9f0a; }
+  .fill-approved { background: #30d158; }
+  .progress-pct { font-size: 12px; font-weight: 600; width: 34px; text-align: right; }
+
+  /* Agent Interpretation */
+  .agent-box {
+    background: #f9f9f9; border-radius: 8px; padding: 8px 12px;
+    margin-bottom: 10px; border: 1px solid #e5e5ea;
+  }
+  .agent-label { font-size: 10px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .agent-quote { font-size: 13px; color: #3c3c43; font-style: italic; line-height: 1.4; }
+  .agent-mapping { font-size: 12px; color: #007aff; margin-top: 4px; }
+
+  /* Gap Box */
+  .gap-box {
+    background: #fff5f5; border-radius: 8px; padding: 8px 12px;
+    margin-bottom: 10px; border: 1px solid #ffd5d5;
+  }
+  .gap-label { font-size: 10px; font-weight: 700; color: #c62828; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .gap-text { font-size: 13px; color: #c62828; }
+
+  /* Card Actions */
+  .card-actions { display: flex; gap: 8px; padding: 0 16px 14px; flex-wrap: wrap; }
+  .btn-approve {
+    background: #30d158; color: #fff; border: none;
+    padding: 8px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-approve:hover { background: #25a244; }
+  .btn-override {
+    background: #f2f2f7; color: #1c1c1e; border: 1px solid #d1d1d6;
+    padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-override:hover { background: #e5e5ea; }
+
+  /* Override Modal */
+  #override-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  #override-modal.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 16px; padding: 24px;
+    width: 340px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-label { font-size: 13px; color: #3c3c43; margin-bottom: 8px; font-weight: 500; }
+  .override-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .pct-chip {
+    padding: 6px 14px; border-radius: 20px; border: 1.5px solid #d1d1d6;
+    font-size: 14px; cursor: pointer; background: #fff; transition: all 0.15s;
+  }
+  .pct-chip.selected { background: #007aff; color: #fff; border-color: #007aff; }
+  .modal-note { font-size: 13px; color: #8e8e93; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-modal-cancel { background: #f2f2f7; color: #1c1c1e; border: none; padding: 9px 18px; border-radius: 10px; font-size: 14px; cursor: pointer; }
+  .btn-modal-confirm { background: #007aff; color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 2px; }
+
+  /* Empty state */
+  .empty-state { text-align: center; color: #8e8e93; font-size: 14px; padding: 40px 20px; }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+  /* Approved check */
+  .approved-check { color: #30d158; font-size: 18px; margin-right: 4px; }
+
+  @media (max-width: 700px) {
+    #foreman-panel { width: 100%; max-width: 100%; border-right: none; }
+    #super-panel { display: none; }
+    #app.show-super #foreman-panel { display: none; }
+    #app.show-super #super-panel { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════ FOREMAN PANEL ══════════════ -->
+  <div id="foreman-panel">
+
+    <!-- Contact List Screen -->
+    <div id="contact-list-screen">
+      <div class="nav-bar">
+        <h2>Messages</h2>
+        <p>Select a foreman to log a progress update</p>
+      </div>
+      <div id="contact-list"></div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chat-screen">
+      <div id="chat-nav">
+        <button id="back-btn" onclick="showContactList()">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
+            <path d="M8.5 1L1.5 8L8.5 15" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back
+        </button>
+        <div id="chat-contact-info">
+          <div id="chat-contact-avatar"></div>
+          <div id="chat-contact-name"></div>
+          <div id="chat-contact-role"></div>
+        </div>
+        <div class="chat-spacer"></div>
+      </div>
+      <div id="message-thread"></div>
+      <div id="input-bar">
+        <textarea id="msg-input" placeholder="iMessage" rows="1" oninput="autoResize(this); toggleSend()"></textarea>
+        <button id="send-btn" onclick="handleSend()" disabled>
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ SUPERINTENDENT PANEL ══════════════ -->
+  <div id="super-panel">
+    <div id="super-header">
+      <div class="header-left">
+        <h1>📋 Schedule Reconciliation</h1>
+        <p id="super-date"></p>
+      </div>
+      <div class="header-right">
+        <button id="bulk-approve-btn" onclick="bulkApprove()">✓ Approve All Pending</button>
+      </div>
+    </div>
+    <div id="stats-bar">
+      <div class="stat-chip"><span class="dot dot-pending"></span><span id="stat-pending">0 Pending</span></div>
+      <div class="stat-chip"><span class="dot dot-gap"></span><span id="stat-gap">0 No Report</span></div>
+      <div class="stat-chip"><span class="dot dot-approved"></span><span id="stat-approved">0 Approved</span></div>
+    </div>
+    <div id="activity-list"></div>
+  </div>
+
+</div>
+
+<!-- Override Modal -->
+<div id="override-modal">
+  <div class="modal-box">
+    <div class="modal-title">Override Completion %</div>
+    <div class="modal-label">Select the correct completion percentage:</div>
+    <div class="override-chips" id="override-chips"></div>
+    <div class="modal-note" id="override-modal-note"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeOverride()">Cancel</button>
+      <button class="btn-modal-confirm" onclick="confirmOverride()">Confirm Override</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA: Stubbed P6 Schedule
+// ══════════════════════════════════════════════
+
+const P6_SCHEDULE = [
+  {
+    id: 'A-101',
+    title: 'Electrical Rough-In — Zone 4 North',
+    trade: 'Electrical',
+    foreman: 'foreman-1',
+    zone: '4',
+    zoneLabel: 'Zone 4 North',
+    baselinePct: 60,
+    currentPct: 60,
+    proposedPct: null,
+    status: 'gap',          // 'gap' | 'pending' | 'approved'
+    rawMessage: null,
+    agentInterpretation: null,
+    agentConfidence: null
+  },
+  {
+    id: 'A-102',
+    title: 'Conduit Pull — Level 3 East Wing',
+    trade: 'Electrical',
+    foreman: 'foreman-1',
+    zone: '3',
+    zoneLabel: 'Level 3 East',
+    baselinePct: 40,
+    currentPct: 40,
+    proposedPct: null,
+    status: 'gap',
+    rawMessage: null,
+    agentInterpretation: null,
+    agentConfidence: null
+  },
+  {
+    id: 'B-201',
+    title: 'Mechanical HVAC Ductwork — Zone 2',
+    trade: 'Mechanical',
+    foreman: 'foreman-2',
+    zone: '2',
+    zoneLabel: 'Zone 2',
+    baselinePct: 75,
+    currentPct: 75,
+    proposedPct: null,
+    status: 'gap',
+    rawMessage: null,
+    agentInterpretation: null,
+    agentConfidence: null
+  },
+  {
+    id: 'B-202',
+    title: 'Plumbing Rough-In — Restrooms Level 2',
+    trade: 'Plumbing',
+    foreman: 'foreman-3',
+    zone: '2',
+    zoneLabel: 'Level 2 Restrooms',
+    baselinePct: 50,
+    currentPct: 50,
+    proposedPct: null,
+    status: 'gap',
+    rawMessage: null,
+    agentInterpretation: null,
+    agentConfidence: null
+  },
+  {
+    id: 'C-301',
+    title: 'Steel Framing — Zone 5 Core',
+    trade: 'Structural',
+    foreman: 'foreman-4',
+    zone: '5',
+    zoneLabel: 'Zone 5 Core',
+    baselinePct: 85,
+    currentPct: 85,
+    proposedPct: null,
+    status: 'gap',
+    rawMessage: null,
+    agentInterpretation: null,
+    agentConfidence: null
+  },
+  {
+    id: 'C-302',
+    title: 'Concrete Pour — Zone 6 Podium Deck',
+    trade: 'Structural',
+    foreman: 'foreman-4',
+    zone: '6',
+    zoneLabel: 'Zone 6 Podium',
+    baselinePct: 30,
+    currentPct: 30,
+    proposedPct: null,
+    status: 'gap',
+    rawMessage: null,
+    agentInterpretation: null,
+    agentConfidence: null
+  }
+];
+
+// ══════════════════════════════════════════════
+//  DATA: Foremen
+// ══════════════════════════════════════════════
+
+const FOREMEN = [
+  {
+    id: 'foreman-1',
+    name: 'Mike Reyes',
+    trade: 'Electrical',
+    initials: 'MR',
+    color: '#007aff',
+    activities: ['A-101', 'A-102'],
+    thread: []
+  },
+  {
+    id: 'foreman-2',
+    name: 'Sandra Torres',
+    trade: 'Mechanical / HVAC',
+    initials: 'ST',
+    color: '#ff6b35',
+    activities: ['B-201'],
+    thread: []
+  },
+  {
+    id: 'foreman-3',
+    name: 'Darnell Webb',
+    trade: 'Plumbing',
+    initials: 'DW',
+    color: '#5ac8fa',
+    activities: ['B-202'],
+    thread: []
+  },
+  {
+    id: 'foreman-4',
+    name: 'Priya Okonkwo',
+    trade: 'Structural / Steel',
+    initials: 'PO',
+    color: '#ff9f0a',
+    activities: ['C-301', 'C-302'],
+    thread: []
+  }
+];
+
+let activeForeman = null;
+let overrideTarget = null;
+let overrideSelectedPct = null;
+
+// ══════════════════════════════════════════════
+//  NLP UTILITIES
+// ══════════════════════════════════════════════
+
+// Zone alias map — many ways to say a zone
+const ZONE_ALIASES = {
+  '1': ['zone 1','zone one','z1','level 1','floor 1','first floor','1st floor'],
+  '2': ['zone 2','zone two','z2','level 2','floor 2','second floor','2nd floor','restroom','bathroom','plumbing level'],
+  '3': ['zone 3','zone three','z3','level 3','floor 3','third floor','3rd floor','east wing','east side'],
+  '4': ['zone 4','zone four','z4','level 4','floor 4','north side','north wing','zone four north','zone 4 north'],
+  '5': ['zone 5','zone five','z5','core','core zone','structural core'],
+  '6': ['zone 6','zone six','z6','podium','podium deck','deck','roof deck','level 6']
+};
+
+// Trade alias map
+const TRADE_ALIASES = {
+  'Electrical': ['electrical','electric','elec','conduit','wire','wiring','panel','lighting','circuits','breaker','rough-in','rough in'],
+  'Mechanical': ['mechanical','hvac','duct','ductwork','air handler','mechanical rough','ventilation','mech'],
+  'Plumbing': ['plumbing','plumb','pipe','piping','drain','water','sewer','restroom rough','bathroom rough','rough-in plumb'],
+  'Structural': ['structural','steel','framing','frame','concrete','pour','deck','rebar','beam','column','slab','core']
+};
+
+function tokenize(str) {
+  if (!str || typeof str !== 'string') return [];
+  var lower = str.toLowerCase();
+  // Replace common punctuation with spaces, keep alphanumeric and spaces
+  lower = lower.replace(/[^a-z0-9\s\-]/g, ' ');
+  // Normalize multiple spaces
+  lower = lower.replace(/\s+/g, ' ').trim();
+  var words = lower.split(' ');
+  // Build bigrams and trigrams in addition to single tokens
+  var tokens = [];
+  for (var i = 0; i < words.length; i++) {
+    if (words[i]) tokens.push(words[i]);
+    if (i + 1 < words.length && words[i+1]) tokens.push(words[i] + ' ' + words[i+1]);
+    if (i + 2 < words.length && words[i+2]) tokens.push(words[i] + ' ' + words[i+1] + ' ' + words[i+2]);
+    if (i + 3 < words.length && words[i+3]) tokens.push(words[i] + ' ' + words[i+1] + ' ' + words[i+2] + ' ' + words[i+3]);
+  }
+  return tokens;
+}
+
+function extractPercentage(text) {
+  if (!text || typeof text !== 'string') return null;
+  var lower = text.toLowerCase();
+
+  // Explicit: "90%", "90 percent", "90 per cent"
+  var pctMatch = lower.match(/(\d{1,3})\s*(%|percent|per cent)/);
+  if (pctMatch) {
+    var val = parseInt(pctMatch[1], 10);
+    if (val >= 0 && val <= 100) return val;
+  }
+
+  // Fraction pattern: "3 of 4 sections", "three quarters done"
+  var fracMatch = lower.match(/(\d+)\s+(?:of|out of|\/)\s+(\d+)/);
+  if (fracMatch) {
+    var num = parseInt(fracMatch[1], 10);
+    var den = parseInt(fracMatch[2], 10);
+    if (den > 0) return Math.round((num / den) * 100);
+  }
+
+  // Written fractions
+  var fractions = {
+    'half': 50, 'halfway': 50,
+    'quarter': 25, 'three quarter': 75, 'three quarters': 75, 'three-quarter': 75,
+    'two thirds': 67, 'two-thirds': 67,
+    'one third': 33, 'one-third': 33
+  };
+  for (var f in fractions) {
+    if (lower.indexOf(f) !== -1) return fractions[f];
+  }
+
+  // Completion adverbs
+  var completionWords = {
+    'complete': 100, 'completed': 100, 'done': 100, 'finished': 100, 'wrapped': 100, 'wrapped up': 100,
+    'almost done': 90, 'nearly done': 90, 'almost complete': 90, 'nearly complete': 90,
+    'mostly done': 80, 'mostly

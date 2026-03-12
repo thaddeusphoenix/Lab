@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule Update Flow — Field Prototype</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #1c1c1e; color: #fff; overflow: hidden; }
+
+  /* ── App Shell ── */
+  #app { display: flex; height: 100vh; width: 100vw; }
+
+  /* ── Left Panel: Foreman View ── */
+  #foreman-panel {
+    width: 390px;
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    border-right: 1px solid #2c2c2e;
+    position: relative;
+  }
+
+  /* Contact List / Foreman Selector */
+  #contact-list {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  #contact-list-header {
+    background: #1c1c1e;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid #2c2c2e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #contact-list-header h2 { font-size: 17px; font-weight: 600; color: #fff; }
+  #contact-list-header .header-sub { font-size: 12px; color: #8e8e93; margin-top: 1px; }
+
+  .foreman-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #1c1c1e;
+    transition: background 0.15s;
+    gap: 12px;
+    background: #000;
+  }
+  .foreman-row:hover { background: #1c1c1e; }
+  .foreman-row.active { background: #1c3a5c; }
+  .foreman-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .foreman-info { flex: 1; }
+  .foreman-name { font-size: 15px; font-weight: 600; color: #fff; }
+  .foreman-trade { font-size: 13px; color: #8e8e93; margin-top: 1px; }
+  .foreman-badge {
+    background: #0a84ff;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Messaging Thread */
+  #chat-view {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    background: #000;
+  }
+  #chat-view.visible { display: flex; }
+  #contact-list.hidden { display: none; }
+
+  #chat-header {
+    background: rgba(28,28,30,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #2c2c2e;
+    min-height: 56px;
+  }
+  #chat-back-btn {
+    background: none; border: none; color: #0a84ff;
+    font-size: 16px; cursor: pointer; padding: 4px 0;
+    display: flex; align-items: center; gap: 3px;
+  }
+  #chat-back-btn svg { width: 10px; height: 16px; }
+  #chat-header-info { flex: 1; text-align: center; }
+  #chat-header-name { font-size: 13px; font-weight: 600; color: #fff; }
+  #chat-header-trade { font-size: 11px; color: #8e8e93; }
+  #chat-header-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+  }
+
+  #message-thread {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  #message-thread::-webkit-scrollbar { width: 4px; }
+  #message-thread::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 2px; }
+
+  .msg-date-divider {
+    text-align: center;
+    font-size: 11px;
+    color: #8e8e93;
+    margin: 8px 0;
+    font-weight: 500;
+  }
+
+  .bubble-row {
+    display: flex;
+    margin-bottom: 2px;
+  }
+  .bubble-row.outgoing { justify-content: flex-end; }
+  .bubble-row.incoming { justify-content: flex-start; }
+
+  .bubble {
+    max-width: 78%;
+    padding: 8px 12px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .bubble-row.outgoing .bubble {
+    background: #0a84ff;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble-row.incoming .bubble {
+    background: #2c2c2e;
+    color: #fff;
+    border-bottom-left-radius: 4px;
+  }
+  .bubble-time {
+    font-size: 10px;
+    color: #8e8e93;
+    margin-top: 3px;
+    display: flex;
+  }
+  .bubble-row.outgoing .bubble-time { justify-content: flex-end; }
+  .bubble-row.incoming .bubble-time { justify-content: flex-start; }
+
+  .bubble-group { display: flex; flex-direction: column; max-width: 78%; }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex; align-items: center; gap: 4px;
+    padding: 10px 14px;
+    background: #2c2c2e;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+  .typing-dot {
+    width: 7px; height: 7px; background: #8e8e93; border-radius: 50%;
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
+  }
+
+  #compose-bar {
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 12px 20px;
+    background: rgba(28,28,30,0.95);
+    border-top: 1px solid #2c2c2e;
+    gap: 8px;
+  }
+  #compose-input {
+    flex: 1;
+    background: #1c1c1e;
+    border: 1px solid #3a3a3c;
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-size: 15px;
+    color: #fff;
+    outline: none;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.4;
+    font-family: inherit;
+  }
+  #compose-input::placeholder { color: #636366; }
+  #compose-input:focus { border-color: #0a84ff; }
+  #send-btn {
+    width: 34px; height: 34px;
+    background: #0a84ff;
+    border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+  #send-btn:hover { background: #0071e3; }
+  #send-btn:active { transform: scale(0.92); }
+  #send-btn:disabled { background: #3a3a3c; cursor: not-allowed; }
+  #send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+  /* ── Right Panel: Superintendent View ── */
+  #super-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #111;
+    min-width: 0;
+  }
+
+  #super-header {
+    background: #1c1c1e;
+    padding: 16px 24px 14px;
+    border-bottom: 1px solid #2c2c2e;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #super-header-left h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  #super-header-left .super-date { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+  #super-header-right { display: flex; gap: 10px; align-items: center; }
+
+  .stat-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: #2c2c2e; border-radius: 20px;
+    padding: 5px 12px; font-size: 12px; font-weight: 600;
+  }
+  .stat-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-pending { background: #ff9f0a; }
+  .dot-gap { background: #ff3b30; }
+  .dot-approved { background: #30d158; }
+
+  #bulk-approve-btn {
+    background: #30d158;
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  #bulk-approve-btn:hover { background: #28bb4a; }
+  #bulk-approve-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Activity List */
+  #activity-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #activity-list::-webkit-scrollbar { width: 5px; }
+  #activity-list::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 3px; }
+
+  /* Section headers */
+  .section-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #8e8e93;
+    padding: 8px 4px 4px;
+    margin-top: 4px;
+  }
+
+  .activity-card {
+    background: #1c1c1e;
+    border-radius: 12px;
+    padding: 14px 16px;
+    border-left: 4px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .activity-card.status-pending { border-left-color: #ff9f0a; }
+  .activity-card.status-gap { border-left-color: #ff3b30; background: #1c1414; }
+  .activity-card.status-approved { border-left-color: #30d158; opacity: 0.7; }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .card-title { font-size: 15px; font-weight: 600; color: #fff; flex: 1; }
+  .card-id { font-size: 11px; color: #636366; font-family: 'SF Mono', 'Fira Code', monospace; }
+
+  .card-meta {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+  }
+  .meta-tag {
+    background: #2c2c2e; border-radius: 6px;
+    padding: 2px 8px; font-size: 11px; color: #ebebf5;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .meta-tag.trade { background: #3a2c1e; color: #ff9f0a; }
+  .meta-tag.zone { background: #1e2c3a; color: #64d2ff; }
+  .meta-tag.pct { background: #1e2c1e; color: #30d158; }
+
+  .card-body {
+    display: flex; gap: 12px; margin-bottom: 10px;
+  }
+  .card-col { flex: 1; }
+  .col-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #636366; margin-bottom: 4px; }
+  .col-value { font-size: 13px; color: #ebebf5; line-height: 1.4; }
+  .col-value.raw-log { font-style: italic; color: #8e8e93; }
+  .col-value.proposed { color: #ff9f0a; }
+  .col-value.gap-label { color: #ff453a; font-weight: 600; }
+
+  /* Progress bar */
+  .progress-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .progress-bar-bg {
+    flex: 1; height: 6px; background: #2c2c2e; border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 3px; transition: width 0.5s ease;
+  }
+  .progress-label { font-size: 11px; color: #8e8e93; min-width: 36px; text-align: right; }
+  .progress-arrow { font-size: 11px; color: #8e8e93; }
+  .progress-proposed { font-size: 11px; color: #ff9f0a; font-weight: 600; min-width: 36px; }
+
+  .card-actions {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .btn-approve {
+    background: #30d158; color: #000; border: none;
+    border-radius: 8px; padding: 6px 16px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-approve:hover { background: #28bb4a; }
+  .btn-approve:active { transform: scale(0.95); }
+
+  .btn-override {
+    background: #2c2c2e; color: #ebebf5; border: none;
+    border-radius: 8px; padding: 6px 14px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-override:hover { background: #3a3a3c; }
+
+  .approved-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #0d2b15; color: #30d158;
+    border-radius: 8px; padding: 5px 12px;
+    font-size: 13px; font-weight: 600;
+  }
+  .approved-badge svg { width: 14px; height: 14px; }
+
+  .gap-note {
+    background: #2b1515; border-radius: 8px;
+    padding: 8px 12px; font-size: 12px; color: #ff453a;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .gap-note svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* Override modal */
+  #override-modal {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.7);
+    align-items: center; justify-content: center;
+  }
+  #override-modal.visible { display: flex; }
+  #override-modal-box {
+    background: #1c1c1e;
+    border-radius: 16px;
+    padding: 24px;
+    width: 360px;
+    max-width: 90vw;
+  }
+  #override-modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  #override-modal-box p { font-size: 13px; color: #8e8e93; margin-bottom: 16px; }
+  #override-input {
+    width: 100%; background: #2c2c2e; border: 1px solid #3a3a3c;
+    border-radius: 10px; padding: 10px 12px;
+    font-size: 15px; color: #fff; font-family: inherit;
+    outline: none; margin-bottom: 12px;
+  }
+  #override-input:focus { border-color: #0a84ff; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-cancel {
+    background: #2c2c2e; color: #fff; border: none;
+    border-radius: 10px; padding: 8px 18px;
+    font-size: 15px; cursor: pointer;
+  }
+  .modal-confirm {
+    background: #0a84ff; color: #fff; border: none;
+    border-radius: 10px; padding: 8px 18px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 40px 20px; color: #636366;
+    font-size: 14px;
+  }
+
+  /* Responsive: stack on narrow viewport */
+  @media (max-width: 700px) {
+    #app { flex-direction: column; overflow: auto; }
+    #foreman-panel { width: 100%; min-width: unset; height: 50vh; border-right: none; border-bottom: 1px solid #2c2c2e; }
+    #super-panel { height: 50vh; }
+  }
+
+  /* Panel labels */
+  .panel-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #636366;
+    padding: 6px 16px 2px;
+    background: #0a0a0a;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════
+       LEFT: FOREMAN VIEW (iOS Messages clone)
+  ════════════════════════════════════════════ -->
+  <div id="foreman-panel">
+    <div class="panel-label">Foreman View</div>
+
+    <!-- Contact / Foreman chooser (no form elements — tap chips) -->
+    <div id="contact-list">
+      <div id="contact-list-header">
+        <div>
+          <h2>Messages</h2>
+          <div class="header-sub">Select your name to log progress</div>
+        </div>
+      </div>
+      <!-- Foreman rows populated by JS -->
+    </div>
+
+    <!-- Chat thread (hidden until foreman selected) -->
+    <div id="chat-view">
+      <div id="chat-header">
+        <button id="chat-back-btn" aria-label="Back to contact list">
+          <svg viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.5 1.5L2 8L8.5 14.5" stroke="#0a84ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back
+        </button>
+        <div id="chat-header-info">
+          <div id="chat-header-name">Site Bot</div>
+          <div id="chat-header-trade"></div>
+        </div>
+        <div id="chat-header-avatar"></div>
+      </div>
+
+      <div id="message-thread">
+        <div class="msg-date-divider" id="thread-date"></div>
+      </div>
+
+      <div id="compose-bar">
+        <textarea
+          id="compose-input"
+          placeholder="iMessage"
+          rows="1"
+          aria-label="Type a progress update"
+        ></textarea>
+        <button id="send-btn" aria-label="Send message">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       RIGHT: SUPERINTENDENT VIEW
+  ════════════════════════════════════════════ -->
+  <div id="super-panel">
+    <div class="panel-label">Superintendent View</div>
+    <div id="super-header">
+      <div id="super-header-left">
+        <h1>Daily Schedule Review</h1>
+        <div class="super-date" id="super-date"></div>
+      </div>
+      <div id="super-header-right">
+        <div class="stat-chip"><span class="dot dot-pending"></span><span id="stat-pending">0</span> Pending</div>
+        <div class="stat-chip"><span class="dot dot-gap"></span><span id="stat-gap">0</span> No Report</div>
+        <div class="stat-chip"><span class="dot dot-approved"></span><span id="stat-approved">0</span> Approved</div>
+        <button id="bulk-approve-btn" onclick="bulkApprove()">Approve All Pending</button>
+      </div>
+    </div>
+    <div id="activity-list">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Override Modal -->
+<div id="override-modal" role="dialog" aria-modal="true" aria-labelledby="override-title">
+  <div id="override-modal-box">
+    <h3 id="override-title">Override Agent Proposal</h3>
+    <p>Enter the corrected completion percentage or a note for this activity.</p>
+    <input type="number" id="override-input" min="0" max="100" placeholder="e.g. 75" />
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeOverrideModal()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmOverride()">Apply Override</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   1. STUBBED P6 SCHEDULE DATASET
+   Minimum 5 activities, 2+ trades, realistic field language targets
+═══════════════════════════════════════════════════════════════════ */
+const P6_SCHEDULE = [
+  {
+    id: "ACT-101",
+    name: "Zone 4 North — Electrical Conduit Rough-In",
+    trade: "Electrical",
+    tradeCode: "ELEC",
+    zone: "Zone 4 North",
+    zoneAliases: ["zone 4", "zone four", "z4", "north side", "north wing", "n4"],
+    tradeAliases: ["electrical", "electric", "elec", "conduit", "rough-in", "roughin", "rough in", "wiring", "wire"],
+    baselinePct: 40,
+    currentPct: 40,
+    proposedPct: null,
+    plannedFinish: "2026-03-12",
+    status: "gap",        // gap | pending | approved
+    foremanId: "F1",
+    rawLog: null,
+    agentNote: null,
+  },
+  {
+    id: "ACT-102",
+    name: "Zone 4 South — Electrical Panel Install",
+    trade: "Electrical",
+    tradeCode: "ELEC",
+    zone: "Zone 4 South",
+    zoneAliases: ["zone 4 south", "zone four south", "z4s", "south side", "south wing", "s4", "panel room"],
+    tradeAliases: ["electrical", "electric", "elec", "panel", "switchboard", "breaker"],
+    baselinePct: 20,
+    currentPct: 20,
+    proposedPct: null,
+    plannedFinish: "2026-03-14",
+    status: "gap",
+    foremanId: "F1",
+    rawLog: null,
+    agentNote: null,
+  },
+  {
+    id: "ACT-201",
+    name: "Zone 2 — Structural Steel Erection Level 3",
+    trade: "Steel / Ironwork",
+    tradeCode: "STEEL",
+    zone: "Zone 2",
+    zoneAliases: ["zone 2", "zone two", "z2", "grid b", "grid-b"],
+    tradeAliases: ["steel", "iron", "ironwork", "erection", "beam", "column", "structural", "metal"],
+    baselinePct: 55,
+    currentPct: 55,
+    proposedPct: null,
+    plannedFinish: "2026-03-13",
+    status: "gap",
+    foremanId: "F2",
+    rawLog: null,
+    agentNote: null,
+  },
+  {
+    id: "ACT-301",
+    name: "Zone 1 — Concrete Deck Pour Level 2",
+    trade: "Concrete",
+    tradeCode: "CONC",
+    zone: "Zone 1",
+    zoneAliases: ["zone 1", "zone one", "z1", "level 2", "deck", "slab"],
+    tradeAliases: ["concrete", "pour", "deck", "slab", "finishing", "cement", "placement"],
+    baselinePct: 0,
+    currentPct: 0,
+    proposedPct: null,
+    plannedFinish: "2026-03-12",
+    status: "gap",
+    foremanId: "F3",
+    rawLog: null,
+    agentNote: null,
+  },
+  {
+    id: "ACT-302",
+    name: "Zone 3 — Formwork Stripping & Prep",
+    trade: "Concrete",
+    tradeCode: "CONC",
+    zone: "Zone 3",
+    zoneAliases: ["zone 3", "zone three", "z3", "formwork area", "form"],
+    tradeAliases: ["concrete", "formwork", "form", "strip", "stripping", "shoring", "falsework", "prep"],
+    baselinePct: 70,
+    currentPct: 70,
+    proposedPct: null,
+    plannedFinish: "2026-03-11",
+    status: "gap",
+    foremanId: "F3",
+    rawLog: null,
+    agentNote: null,
+  },
+  {
+    id: "ACT-401",
+    name: "Zone 5 — MEP Overhead Rough-In Corridor",
+    trade: "Mechanical",
+    tradeCode: "MECH",
+    zone: "Zone 5",
+    zoneAliases: ["zone 5", "zone five", "z5", "corridor", "hallway", "mep corridor"],
+    tradeAliases: ["mechanical", "mep", "hvac", "duct", "ductwork", "piping", "pipe", "overhead", "plumbing"],
+    baselinePct: 30,
+    currentPct: 30,
+    proposedPct: null,
+    plannedFinish: "2026-03-15",
+    status: "gap",
+    foremanId: "F4",
+    rawLog: null,
+    agentNote: null,
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. FOREMAN ROSTER
+═══════════════════════════════════════════════════════════════════ */
+const FOREMEN = [
+  { id: "F1", name: "Marcus Webb",    trade: "Electrical",     initials: "MW", color: "#ff9f0a" },
+  { id: "F2", name: "Darnell Ortiz",  trade: "Steel / Ironwork", initials: "DO", color: "#64d2ff" },
+  { id: "F3", name: "Ray Kowalski",   trade: "Concrete",       initials: "RK", color: "#bf5af2" },
+  { id: "F4", name: "Sanjay Mehta",   trade: "Mechanical",     initials: "SM", color: "#ff6369" },
+];
+
+/* Per-foreman message thread state */
+const threadState = {};
+FOREMEN.forEach(f => { threadState[f.id] = []; });
+
+let activeForemanId = null;
+let overrideTargetId = null;
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. AGENT NLP MAPPING — keyword/token extraction
+   Maps natural-language message to the best-matching P6 activity.
+   Uses zone tokens + trade/type tokens + optional pct extraction.
+═══════════════════════════════════════════════════════════════════ */
+function tokenize(str) {
+  return str.toLowerCase()

@@ -1,0 +1,55 @@
+{
+  "brief": "/Users/nathanstankowski/lab/shared/briefs/ios-sms-mock.md",
+  "scenarios": "/Users/nathanstankowski/lab/shared/briefs/ios-sms-mock-scenarios.md",
+  "started": "2026-03-11T23:00:30.422870+00:00",
+  "max_iterations": 5,
+  "runs": [
+    {
+      "run": 1,
+      "timestamp": "2026-03-11T23:01:45.873276+00:00",
+      "result": "PASS",
+      "scenarios": [
+        {
+          "id": "S1",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "Outgoing bubbles: CSS sets background:#007AFF and color:#fff. Incoming bubbles: background:#E5E5EA and color:#000. Both match spec exactly."
+        },
+        {
+          "id": "S2",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "Send button initializes with class 'inactive' (background:#AEAEB2) and disabled=true. On input event, when value.trim().length>0 it switches to class 'active' (background:#007AFF) and disabled=false. Correctly toggles on empty vs non-empty."
+        },
+        {
+          "id": "S3",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "send() reads input.value.trim(), calls addBubble('out', txt, ...) appending a right-aligned blue bubble, then sets input.value='' and resets height. Input is cleared and new outgoing bubble is appended."
+        },
+        {
+          "id": "S4",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "After send(), setTimeout fires after 1000\u20132000ms and calls addBubble('in', r, false) with a random AUTO_REPLIES entry. Incoming gray bubble appears within the 1\u20133 second window required."
+        },
+        {
+          "id": "S5",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "All 6 rubric elements present: (1) Status bar shows '9:41' with signal/wifi/battery SVG icons; (2) Nav header has '<' chevron + '2' back label + centered contact name with avatar + video/phone icon buttons on right; (3) Bubble tails implemented via CSS clip-path pseudo-elements \u2014 .out .bubble::after points right, .in .bubble::before points left; (4) Pill-shaped input with border-radius:20px and #F2F2F7 background; (5) Circular send button (28px border-radius:50%) with white upward arrow SVG; (6) Colors match spec \u2014 #007AFF outgoing, #E5E5EA incoming, #F2F2F7 backgrounds. Minor: nav back label shows '2' (a badge number) rather than a text label like 'Back', but chevron is present and the overall composition reads as iOS Messages."
+        },
+        {
+          "id": "S6",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "Config block is delimited by '/* === CONFIG \u2014 fork here === */' and '/* === END CONFIG === */' comments at the top of the script. Contains CONTACT_NAME (string), INITIAL_MESSAGES (array of objects), and AUTO_REPLIES (array of strings). All values are simple literals. The block is findable in under 5 seconds and entirely separate from application logic."
+        }
+      ],
+      "spec_amendment": null
+    }
+  ],
+  "finished": "2026-03-11T23:01:45.874450+00:00",
+  "final_result": "PASS",
+  "total_runs": 1
+}

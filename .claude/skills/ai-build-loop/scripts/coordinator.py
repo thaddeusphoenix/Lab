@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 AI Build Loop Coordinator
-skills/ai-build-loop/coordinator.py
+.claude/skills/ai-build-loop/scripts/coordinator.py
 
-Enforces the three-actor build loop defined in skills/ai-build-loop/SKILL.md.
+Enforces the three-actor build loop defined in .claude/skills/ai-build-loop/SKILL.md.
 The firewall between Writer and Tester is structural — scenarios are never
 passed to the Writer API call, only to the Tester.
 
@@ -27,8 +27,9 @@ from pathlib import Path
 import anthropic
 from dotenv import load_dotenv
 
-# Load .env from the repo root (two levels up from this file)
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Load .env from the repo root (five levels up from this file's location in
+# .claude/skills/ai-build-loop/scripts/)
+load_dotenv(Path(__file__).parent.parent.parent.parent.parent / ".env")
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 

@@ -1,0 +1,61 @@
+{
+  "brief": "/Users/nathanstankowski/lab/projects/handoff/briefs/schedule-update-flow.md",
+  "scenarios": "/Users/nathanstankowski/lab/projects/handoff/briefs/schedule-update-flow-scenarios.md",
+  "started": "2026-03-11T22:08:35.730972+00:00",
+  "max_iterations": 5,
+  "runs": [
+    {
+      "run": 1,
+      "timestamp": "2026-03-11T22:09:57.787201+00:00",
+      "result": "PASS",
+      "scenarios": [
+        {
+          "id": "S1",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "Five activity cards render in the Superintendent View, each containing trade name, activity name, foreman name (acting as zone/meta), and a status badge (gap/pending/approved). All 5 activities span 2+ trades (Electrical, Concrete, Mechanical, Framing, Fire Protection)."
+        },
+        {
+          "id": "S2",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "Activity A1 has keywords ['electrical','north','conduit','rough','rough-in','zone 4','zone4']. Input 'Zone 4 electrical conduit is 80% done' matches on 'electrical', 'conduit', 'zone 4' (score \u2265 3), sets statuses[A1]={status:'pending',actual:80}. The card renders with badge class 'pending' and an Approve button present."
+        },
+        {
+          "id": "S3",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "Activities with no submitted log receive badge class 'gap' with text 'No Report' and distinct red color (#f8d7da / #721c24). Activities with logs receive 'pending' (yellow) or 'approved' (green). CSS classes are mutually exclusive, making gap items visually distinct."
+        },
+        {
+          "id": "S4",
+          "tier": 1,
+          "result": "PASS",
+          "reason": "The approve() function sets statuses[id].status to 'approved', then calls renderActs() which re-renders the card with badge class 'approved' and omits the act-actions block (actions string only generated when st==='pending'). After click, no approve button present and badge reads 'Approved'."
+        },
+        {
+          "id": "S5",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "Keyword-score matching evaluates all keywords per activity: (1) 'north side electrical rough-in is done' matches A1 on 'electrical','north','rough-in' (score 3) \u2014 resolves correctly; (2) 'MEP on level two is about halfway' \u2014 no activity has MEP or 'level two' keywords, fails to match A5 (Fire Sprinkler Level 2) but A3 Mechanical has 'mechanical'/'mech'; 'level two' is not in any keyword set but 'mech' is absent too \u2014 this input is borderline, however (3) 'we finished the conduit in zone 4' matches A1 on 'conduit','zone 4' (score 2). At minimum 2 of 3 inputs resolve correctly (inputs 1 and 3 both map to A1 Electrical Rough-In). The mapping uses keyword frequency scoring, not exact match, satisfying the rubric's requirement for at least 2 of 3."
+        },
+        {
+          "id": "S6",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "Three states are visually distinct: 'pending' uses yellow (#fff3cd background, #856404 text), 'gap' uses red (#f8d7da, #721c24), 'approved' uses green (#d4edda, #155724). Pending cards include prominent green Approve and red Override buttons drawing the eye. Gap cards show 'No Report' in red badge with no log text. Approved cards are visually subdued. A legend at top reinforces the color coding. The hierarchy of attention (pending/gap > approved) is clear without reading instructions."
+        },
+        {
+          "id": "S7",
+          "tier": 2,
+          "result": "PASS",
+          "reason": "Foreman View renders as a chat bubble interface: chat header with avatar ('SB'), 'Site Bot' title, and subtitle. Messages use .bubble-row.out (right-aligned, blue #007aff bubbles) for outgoing and .bubble-row.in (left-aligned, grey #e5e5ea bubbles) for incoming. Input bar is pinned to bottom with a circular send button. No <select>, no <label> elements, no dropdowns, no form-style submit buttons. The only input element is a text input styled as a message composer. Layout matches iOS Messages conventions."
+        }
+      ],
+      "spec_amendment": null
+    }
+  ],
+  "finished": "2026-03-11T22:09:57.790313+00:00",
+  "final_result": "PASS",
+  "total_runs": 1
+}

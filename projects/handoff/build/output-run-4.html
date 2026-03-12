@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule Update Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0f0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;max-width:1100px;margin:0 auto;width:100%}
+#tab-bar{display:flex;background:#1a1a2e;padding:0}
+.tab-btn{flex:1;padding:14px;border:none;background:none;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s}
+.tab-btn.active{color:#fff;border-bottom-color:#4f8ef7}
+#foreman-view,#super-view{flex:1;overflow:hidden;display:none;flex-direction:column}
+#foreman-view.active,#super-view.active{display:flex}
+
+/* Contact list */
+#contact-list{flex:1;overflow-y:auto;background:#fff}
+.contact-header{padding:16px;font-size:13px;font-weight:700;color:#888;background:#f7f7f7;border-bottom:1px solid #e5e5e5;text-transform:uppercase;letter-spacing:.5px}
+.contact-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer;gap:12px;transition:background .15s}
+.contact-row:hover{background:#f5f5f5}
+.contact-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.contact-info{flex:1}
+.contact-name{font-size:16px;font-weight:600;color:#1a1a1a}
+.contact-trade{font-size:13px;color:#888;margin-top:2px}
+.contact-badge{width:22px;height:22px;border-radius:50%;background:#4f8ef7;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* Chat view */
+#chat-view{display:none;flex-direction:column;flex:1;overflow:hidden}
+#chat-view.active{display:flex}
+#chat-header{background:#1a1a2e;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px}
+#back-btn{background:none;border:none;color:#4f8ef7;font-size:15px;cursor:pointer;padding:4px 8px 4px 0}
+#chat-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+#chat-title{font-size:16px;font-weight:600}
+#chat-subtitle{font-size:12px;color:#aaa;margin-top:1px}
+#message-thread{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:#f5f5f5}
+.bubble-row{display:flex;max-width:80%}
+.bubble-row.out{align-self:flex-end;justify-content:flex-end}
+.bubble-row.in{align-self:flex-start}
+.bubble{padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.4;word-break:break-word}
+.bubble-row.out .bubble{background:#4f8ef7;color:#fff;border-bottom-right-radius:4px}
+.bubble-row.in .bubble{background:#fff;color:#1a1a1a;border-bottom-left-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.bubble-time{font-size:11px;color:#aaa;margin-top:3px;text-align:right}
+.bubble-row.in .bubble-time{text-align:left}
+#input-bar{background:#fff;border-top:1px solid #e5e5e5;padding:8px 12px;display:flex;align-items:flex-end;gap:8px}
+#msg-input{flex:1;border:1px solid #ddd;border-radius:20px;padding:9px 14px;font-size:15px;resize:none;max-height:100px;line-height:1.4;outline:none;font-family:inherit}
+#send-btn{width:36px;height:36px;border-radius:50%;background:#4f8ef7;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.4;transition:opacity .2s}
+#send-btn.ready{opacity:1}
+#send-btn svg{fill:#fff;width:18px;height:18px}
+
+/* Superintendent view */
+#super-view{background:#f0f2f5}
+#super-header{background:#1a1a2e;color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#super-header h2{font-size:18px;font-weight:700}
+#super-header .date{font-size:13px;color:#aaa;margin-top:2px}
+#bulk-approve-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
+#bulk-approve-btn:hover{background:#16a34a}
+#bulk-approve-btn:disabled{background:#555;cursor:default}
+#summary-bar{display:flex;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid #e5e5e5;flex-shrink:0}
+.stat-chip{flex:1;text-align:center;padding:10px;border-radius:8px;background:#f7f7f7}
+.stat-num{font-size:22px;font-weight:800}
+.stat-label{font-size:11px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.chip-pending .stat-num{color:#f59e0b}
+.chip-gap .stat-num{color:#ef4444}
+.chip-approved .stat-num{color:#22c55e}
+#activity-list{flex:1;overflow-y:auto;padding:12px}
+.activity-card{background:#fff;border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.activity-card-header{display:flex;align-items:center;padding:12px 14px;gap:10px;border-bottom:1px solid #f0f0f0}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-pending .status-dot{background:#f59e0b}
+.status-gap .status-dot{background:#ef4444}
+.status-approved .status-dot{background:#22c55e}
+.activity-id{font-size:11px;font-weight:700;color:#888;background:#f0f0f0;padding:2px 7px;border-radius:4px}
+.activity-name{font-size:14px;font-weight:700;color:#1a1a1a;flex:1}
+.status-label{font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
+.status-pending .status-label{background:#fef3c7;color:#d97706}
+.status-gap .status-label{background:#fee2e2;color:#dc2626}
+.status-approved .status-label{background:#dcfce7;color:#16a34a}
+.activity-body{padding:12px 14px}
+.activity-meta{display:flex;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.meta-item{font-size:12px;color:#666}
+.meta-item strong{color:#333;font-weight:600}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.progress-bar-wrap{flex:1;height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width .4s}
+.status-pending .progress-bar-fill{background:#f59e0b}
+.status-gap .progress-bar-fill{background:#e5e7eb}
+.status-approved .progress-bar-fill{background:#22c55e}
+.progress-pct{font-size:12px;font-weight:700;color:#555;width:36px;text-align:right}
+.agent-note{font-size:13px;color:#555;background:#f8f9ff;border-left:3px solid #4f8ef7;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.4}
+.gap-note{font-size:13px;color:#ef4444;background:#fff5f5;border-left:3px solid #ef4444;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:10px}
+.action-row{display:flex;gap:8px;justify-content:flex-end}
+.approve-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s}
+.approve-btn:hover{background:#16a34a}
+.override-btn{background:none;color:#4f8ef7;border:1px solid #4f8ef7;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.override-btn:hover{background:#eff6ff}
+
+/* Override modal */
+#override-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+#override-modal.open{display:flex}
+#override-box{background:#fff;border-radius:16px;padding:24px;width:90%;max-width:400px}
+#override-box h3{font-size:18px;font-weight:700;margin-bottom:6px}
+#override-box p{font-size:13px;color:#666;margin-bottom:16px}
+#override-pct-input{width:100%;border:1px solid #ddd;border-radius:8px;padding:10px 14px;font-size:16px;margin-bottom:8px;outline:none;font-family:inherit}
+#override-note-input{width:100%;border:1px solid #ddd;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:16px;outline:none;font-family:inherit;resize:none;height:70px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-cancel{background:none;border:1px solid #ddd;border-radius:8px;padding:9px 18px;font-size:14px;cursor:pointer}
+.modal-confirm{background:#4f8ef7;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="tab-bar">
+    <button class="tab-btn active" data-tab="foreman">Foreman View</button>
+    <button class="tab-btn" data-tab="super">Superintendent View</button>
+  </div>
+
+  <!-- FOREMAN VIEW -->
+  <div id="foreman-view" class="active">
+    <div id="contact-list">
+      <div class="contact-header">Select Foreman</div>
+      <div id="contact-rows"></div>
+    </div>
+    <div id="chat-view">
+      <div id="chat-header">
+        <button id="back-btn">&#8592;</button>
+        <div id="chat-avatar"></div>
+        <div>
+          <div id="chat-title"></div>
+          <div id="chat-subtitle"></div>
+        </div>
+      </div>
+      <div id="message-thread"></div>
+      <div id="input-bar">
+        <textarea id="msg-input" rows="1" placeholder="iMessage"></textarea>
+        <button id="send-btn">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPERINTENDENT VIEW -->
+  <div id="super-view">
+    <div id="super-header">
+      <div>
+        <h2>Schedule Review</h2>
+        <div class="date" id="review-date"></div>
+      </div>
+      <button id="bulk-approve-btn">Approve All Pending</button>
+    </div>
+    <div id="summary-bar">
+      <div class="stat-chip chip-pending"><div class="stat-num" id="cnt-pending">0</div><div class="stat-label">Pending</div></div>
+      <div class="stat-chip chip-gap"><div class="stat-num" id="cnt-gap">0</div><div class="stat-label">No Report</div></div>
+      <div class="stat-chip chip-approved"><div class="stat-num" id="cnt-approved">0</div><div class="stat-label">Approved</div></div>
+    </div>
+    <div id="activity-list"></div>
+  </div>
+</div>
+
+<!-- Override Modal -->
+<div id="override-modal">
+  <div id="override-box">
+    <h3>Override Update</h3>
+    <p id="override-activity-name"></p>
+    <input type="number" id="override-pct-input" min="0" max="100" placeholder="Completion % (0–100)">
+    <textarea id="override-note-input" placeholder="Optional note for record..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeOverride()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmOverride()">Save Override</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 1. DATA ───────────────────────────────────────────────────────────────────
+
+var P6_SCHEDULE = [
+  {
+    id: "A-1001",
+    name: "Zone 4 North – Electrical Rough-In",
+    trade: "electrical",
+    zone: "zone4",
+    foreman: "f1",
+    baselinePct: 60,
+    currentPct: 60,
+    proposedPct: null,
+    status: "gap",
+    agentNote: null,
+    sourceMessage: null
+  },
+  {
+    id: "A-1002",
+    name: "Zone 4 South – Conduit Pull",
+    trade: "electrical",
+    zone: "zone4",
+    foreman: "f1",
+    baselinePct: 40,
+    currentPct: 40,
+    proposedPct: null,
+    status: "gap",
+    agentNote: null,
+    sourceMessage: null
+  },
+  {
+    id: "A-1003",
+    name: "Zone 2 – Mechanical Ductwork",
+    trade: "mechanical",
+    zone: "zone2",
+    foreman: "f2",
+    baselinePct: 75,
+    currentPct: 75,
+    proposedPct: null,
+    status: "gap",
+    agentNote: null,
+    sourceMessage: null
+  },
+  {
+    id: "A-1004",
+    name: "Zone 2 – Plumbing Rough-In",
+    trade: "plumbing",
+    zone: "zone2",
+    foreman: "f3",
+    baselinePct: 50,
+    currentPct: 50,
+    proposedPct: null,
+    status: "gap",
+    agentNote: null,
+    sourceMessage: null
+  },
+  {
+    id: "A-1005",
+    name: "Zone 3 – Structural Steel Erection",
+    trade: "structural",
+    zone: "zone3",
+    foreman: "f4",
+    baselinePct: 85,
+    currentPct: 85,
+    proposedPct: null,
+    status: "gap",
+    agentNote: null,
+    sourceMessage: null
+  },
+  {
+    id: "A-1006",
+    name: "Zone 1 – Concrete Slab Pour",
+    trade: "concrete",
+    zone: "zone1",
+    foreman: "f5",
+    baselinePct: 30,
+    currentPct: 30,
+    proposedPct: null,
+    status: "gap",
+    agentNote: null,
+    sourceMessage: null
+  }
+];
+
+var FOREMEN = [
+  { id: "f1", name: "Marcus Webb",    trade: "Electrical",  color: "#f59e0b", initials: "MW", activities: ["A-1001","A-1002"] },
+  { id: "f2", name: "Diana Reyes",    trade: "Mechanical",  color: "#8b5cf6", initials: "DR", activities: ["A-1003"] },
+  { id: "f3", name: "Tony Okafor",    trade: "Plumbing",    color: "#06b6d4", initials: "TO", activities: ["A-1004"] },
+  { id: "f4", name: "Sam Johansson",  trade: "Structural",  color: "#ef4444", initials: "SJ", activities: ["A-1005"] },
+  { id: "f5", name: "Carl Baptiste",  trade: "Concrete",    color: "#22c55e", initials: "CB", activities: ["A-1006"] }
+];
+
+var ZONE_ALIASES = {
+  zone1: ["zone1","zone 1","z1","one","area 1","level 1"],
+  zone2: ["zone2","zone 2","z2","two","area 2","level 2"],
+  zone3: ["zone3","zone 3","z3","three","area 3","level 3"],
+  zone4: ["zone4","zone 4","z4","four","area 4","level 4","north","south"]
+};
+
+var TRADE_ALIASES = {
+  electrical: ["electrical","electric","conduit","wire","wiring","breaker","panel","rough-in","roughin","rough in"],
+  mechanical: ["mechanical","hvac","duct","ductwork","air handler","vav","mech"],
+  plumbing:   ["plumbing","plumb","pipe","piping","drain","sanitary","water","pex"],
+  structural: ["structural","steel","beam","column","erection","ironwork","iron"],
+  concrete:   ["concrete","slab","pour","cement","formwork","rebar"]
+};
+
+var currentForeman = null;
+var chatHistory = {};
+var overrideTargetId = null;
+
+// ── 2. tokenize ───────────────────────────────────────────────────────────────
+function tokenize(str) {
+  if (!str) return [];
+  return str.toLowerCase()
+    .replace(/[^a-z0-9\s\-]/g, " ")
+    .split(/\s+/)
+    .filter(function(t) { return t.length > 0; });
+}
+
+// ── 3. extractPercentage ──────────────────────────────────────────────────────
+function extractPercentage(text) {
+  var t = text.toLowerCase();
+  var m;
+
+  m = t.match(/(\d{1,3})\s*%/);
+  if (m) return Math.min(100, Math.max(0, parseInt(m[1], 10)));
+
+  m = t.match(/(\d{1,3})\s*percent/);
+  if (m) return Math.min(100, Math.max(0, parseInt(m[1], 10)));
+
+  if (/\b(complete|done|finished|wrapped up|all done)\b/.test(t)) return 100;
+  if (/\bhalf(way)?\b/.test(t)) return 50;
+  if (/\b(almost|nearly)\s*(done|complete|finished)\b/.test(t)) return 90;
+  if (/\bgood\s*progress\b/.test(t)) return 70;
+  if (/\bjust\s*(started|beginning|kicked\s*off)\b/.test(t)) return 10;
+
+  return null;
+}
+
+// ── 4. mapMessageToActivity ───────────────────────────────────────────────────
+function mapMessageToActivity(text, foremanId) {
+  var tokens = tokenize(text);
+  var foreman = null;
+  for (var i = 0; i < FOREMEN.length; i++) {
+    if (FOREMEN[i].id === foremanId) { foreman = FOREMEN[i]; break; }
+  }
+
+  var scores = {};
+  P6_SCHEDULE.forEach(function(act) { scores[act.id] = 0; });
+
+  // Zone scoring
+  Object.keys(ZONE_ALIASES).forEach(function(zone) {
+    var aliases = ZONE_ALIASES[zone];
+    aliases.forEach(function(alias) {
+      var aliasTokens = tokenize(alias);
+      var matchCount = 0;
+      aliasTokens.forEach(function(at) {
+        tokens.forEach(function(t) {
+          if (t === at || (at.length > 3 && t.indexOf(at) !== -1)) matchCount++;
+        });
+      });
+      if (matchCount > 0) {
+        P6_SCHEDULE.forEach(function(act) {
+          if (act.zone === zone) scores[act.id] += matchCount * 3;
+        });
+      }
+    });
+  });
+
+  // Trade scoring
+  Object.keys(TRADE_ALIASES).forEach(function(trade) {
+    var aliases = TRADE_ALIASES[trade];
+    aliases.forEach(function(alias) {
+      var aliasTokens = tokenize(alias);
+      var matchCount = 0;
+      aliasTokens.forEach(function(at) {
+        tokens.forEach(function(t) {
+          if (t === at || (at.length > 3 && t.indexOf(at) !== -1)) matchCount++;
+        });
+      });
+      if (matchCount > 0) {
+        P6_SCHEDULE.forEach(function(act) {
+          if (act.trade === trade) scores[act.id] += matchCount * 4;
+        });
+      }
+    });
+  });
+
+  // Foreman bonus – boost activities assigned to this foreman
+  if (foreman) {
+    foreman.activities.forEach(function(actId) {
+      scores[actId] = (scores[actId] || 0) + 5;
+    });
+  }
+
+  // Find best score
+  var bestId = null;
+  var bestScore = 0;
+  Object.keys(scores).forEach(function(id) {
+    if (scores[id] > bestScore) {
+      bestScore = scores[id];
+      bestId = id;
+    }
+  });
+
+  // Require minimum confidence
+  if (bestScore < 5) {
+    // Fall back to first foreman activity if one exists
+    if (foreman && foreman.activities.length > 0) {
+      bestId = foreman.activities[0];
+    } else {
+      return null;
+    }
+  }
+
+  return bestId;
+}
+
+// ── 5. renderActivityList ─────────────────────────────────────────────────────
+function renderActivityList() {
+  var list = document.getElementById("activity-list");
+  list.innerHTML = "";
+  var pending = 0, gap = 0, approved = 0;
+
+  P6_SCHEDULE.forEach(function(act) {
+    if (act.status === "pending") pending++;
+    else if (act.status === "gap") gap++;
+    else if (act.status === "approved") approved++;
+
+    var foreman = null;
+    for (var i = 0; i < FOREMEN.length; i++) {
+      if (FOREMEN[i].id === act.foreman) { foreman = FOREMEN[i]; break; }
+    }
+
+    var card = document.createElement("div");
+    card.className = "activity-card status-" + act.status;
+    card.id = "card-" + act.id;
+
+    var displayPct = act.status === "pending" ? act.proposedPct : act.currentPct;
+    var statusText = act.status === "pending" ? "Pending Approval"
+                   : act.status === "approved" ? "Approved"
+                   : "No Report";
+
+    var progressWidth = displayPct !== null ? displayPct : act.currentPct;
+    var foremanName = foreman ? foreman.name : "Unknown";
+    var tradeLabel = foreman ? foreman.trade : act.trade;
+
+    var noteHtml = "";
+    if (act.status === "pending" && act.agentNote) {
+      noteHtml = '<div class="agent-note">&#129302; ' + escHtml(act.agentNote) + "</div>";
+    } else if (act.status === "gap") {
+      noteHtml = '<div class="gap-note">&#9888; No update received from ' + escHtml(foremanName) + " today.</div>";
+    } else if (act.status === "approved" && act.agentNote) {
+      noteHtml = '<div class="agent-note" style="border-color:#22c55e;background:#f0fdf4;">&#10003; ' + escHtml(act.agentNote) + "</div>";
+    }
+
+    var actionsHtml = "";
+    if (act.status === "pending") {
+      actionsHtml = '<div class="action-row">'
+        + '<button class="override-btn" onclick="openOverride(\'' + act.id + '\')">Override</button>'
+        + '<button class="approve-btn" onclick="approveActivity(\'' + act.id + '\')">Approve</button>'
+        + "</div>";
+    }
+
+    card.innerHTML = '<div class="activity-card-header">'
+      + '<div class="status-dot"></div>'
+      + '<span class="activity-id">' + escHtml(act.id) + "</span>"
+      + '<span class="activity-name">' + escHtml(act.name) + "</span>"
+      + '<span class="status-label">' + statusText + "</span>"
+      + "</div>"
+      + '<div class="activity-body">'
+      + '<div class="activity-meta">'
+      + '<span class="meta-item"><strong>Foreman:</strong> ' + escHtml(foremanName) + "</span>"
+      + '<span class="meta-item"><strong>Trade:</strong> ' + escHtml(tradeLabel) + "</span>"
+      + '<span class="meta-item"><strong>Baseline:</strong> ' + act.baselinePct + "%</span>"
+      + "</div>"
+      + '<div class="progress-row">'
+      + '<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:' + progressWidth + '%"></div></div>'
+      + '<span class="progress-pct">' + progressWidth + "%</span>"
+      + "</div>"
+      + noteHtml
+      + actionsHtml
+      + "</div>";
+
+    list.appendChild(card);
+  });
+
+  document.getElementById("cnt-pending").textContent = pending;
+  document.getElementById("cnt-gap").textContent = gap;
+  document.getElementById("cnt-approved").textContent = approved;
+
+  var bulkBtn = document.getElementById("bulk-approve-btn");
+  bulkBtn.disabled = pending === 0;
+}
+
+// ── 6. approveActivity ────────────────────────────────────────────────────────
+function approveActivity(activityId) {
+  for (var i = 0; i < P6_SCHEDULE.length; i++) {
+    if (P6_SCHEDULE[i].id === activityId) {
+      var act = P6_SCHEDULE[i];
+      act.currentPct = act.proposedPct !== null ? act.proposedPct : act.currentPct;
+      act.status = "approved";
+      break;
+    }
+  }
+  renderActivityList();
+}
+
+// ── 7. bulkApprove ────────────────────────────────────────────────────────────
+function bulkApprove() {
+  P6_SCHEDULE.forEach(function(act) {
+    if (act.status === "pending") {
+      act.currentPct = act.proposedPct !== null ? act.proposedPct : act.currentPct;
+      act.status = "approved";
+    }
+  });
+  renderActivityList();
+}
+
+// ── 8. handleSend ─────────────────────────────────────────────────────────────
+function handleSend() {
+  var input = document.getElementById("msg-input");
+  var text = input.value.trim();
+  if (!text || !currentForeman) return;
+
+  var now = new Date();
+  var timeStr = now.getHours() % 12 || 12;
+  timeStr += ":" + String(now.getMinutes()).padStart(2,"0") + (now.getHours() >= 12 ? " PM" : " AM");
+
+  // Append outgoing bubble
+  appendBubble("out", text, timeStr);
+  input.value = "";
+  input.style.height = "auto";
+  document.getElementById("send-btn").classList.remove("ready");
+
+  // Store in chat history
+  if (!chatHistory[currentForeman.id]) chatHistory[currentForeman.id] = [];
+  chatHistory[currentForeman.id].push({ dir: "out", text: text, time: timeStr });
+
+  // Agent mapping
+  var actId = mapMessageToActivity(text, currentForeman.id);
+  var act = null;
+  if (actId) {
+    for (var i = 0; i < P6_SCHEDULE.length; i++) {
+      if (P6_SCHEDULE[i].id === actId) { act = P6_SCHEDULE[i]; break; }
+    }
+  }
+
+  setTimeout(function() {
+    var replyText;
+    if (act) {
+      var pct = extractPercentage(text);
+      var proposed = pct !== null ? pct : act.currentPct;
+      act.proposedPct = proposed;
+      act.status = "pending";
+      act.sourceMessage = text;
+      act.agentNote = "Mapped to " + act.id + " — " + act.name + ". Proposed completion: " + proposed + "%. Based on: \"" + text + "\"";
+
+      replyText = "Got it, " + currentForeman.

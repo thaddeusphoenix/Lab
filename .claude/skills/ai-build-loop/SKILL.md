@@ -9,7 +9,7 @@ Confirm two files exist in `projects/<name>/briefs/`:
 - `[feature-name].md` — the brief (Writer input)
 - `[feature-name]-scenarios.md` — acceptance scenarios (Tester input only)
 
-If either is missing or incomplete, stop. Use `skills/write-a-brief` first.
+If either is missing or incomplete, stop. Use the `write-a-brief` skill first.
 
 ---
 
@@ -126,14 +126,14 @@ The Coordinator script enforces the firewall at the API call level — scenarios
 ### Setup
 
 ```bash
-pip3 install -r skills/ai-build-loop/requirements.txt
+pip3 install -r .claude/skills/ai-build-loop/scripts/requirements.txt
 export ANTHROPIC_API_KEY=your_key_here
 ```
 
 ### Run
 
 ```bash
-python3 skills/ai-build-loop/coordinator.py \
+python3 .claude/skills/ai-build-loop/scripts/coordinator.py \
   --brief   projects/<name>/briefs/<feature>.md \
   --scenarios projects/<name>/briefs/<feature>-scenarios.md
 ```
@@ -141,7 +141,7 @@ python3 skills/ai-build-loop/coordinator.py \
 With an explicit output directory:
 
 ```bash
-python3 skills/ai-build-loop/coordinator.py \
+python3 .claude/skills/ai-build-loop/scripts/coordinator.py \
   --brief   projects/<name>/briefs/<feature>.md \
   --scenarios projects/<name>/briefs/<feature>-scenarios.md \
   --output-dir projects/<name>/build/
