@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  openproject:
+    image: openproject/openproject:15
+    ports:
+      - "8080:80"
+    environment:
+      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_HOST__NAME: "localhost:8080"
+      SECRET_KEY_BASE: secret
+      DATABASE_URL: postgres://op:op@db/openproject
+    depends_on:
+      - db
+    volumes:
+      - op-assets:/var/openproject/assets
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: openproject
+      POSTGRES_USER: op
+      POSTGRES_PASSWORD: op
+    volumes:
+      - op-db:/var/lib/postgresql/data
+
+volumes:
+  op-assets:
+  op-db:
